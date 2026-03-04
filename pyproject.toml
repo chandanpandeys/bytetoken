@@ -1,0 +1,72 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bytetoken"
+version = "1.0.0"
+description = "Token-efficient binary encoding for LLM context windows. 15-17 bits/token vs Base64's 5.6."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.8"
+authors = [
+    {name = "Chandan Pandey"}
+]
+keywords = [
+    "llm", "tokenizer", "bpe", "encoding", "binary",
+    "context-window", "token-optimization", "base64",
+    "openai", "anthropic", "gemini"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Networking",
+]
+
+dependencies = [
+    "tiktoken>=0.5.0",
+]
+
+[project.optional-dependencies]
+sentencepiece = ["sentencepiece>=0.1.99"]
+native = ["cffi>=1.0", "numpy>=1.20"]
+all = [
+    "sentencepiece>=0.1.99",
+    "cffi>=1.0",
+    "numpy>=1.20",
+]
+dev = [
+    "pytest>=7.0",
+    "sentencepiece>=0.1.99",
+    "cffi>=1.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/bytetoken/ByteToken"
+Documentation = "https://github.com/bytetoken/ByteToken#readme"
+Repository = "https://github.com/bytetoken/ByteToken"
+Issues = "https://github.com/bytetoken/ByteToken/issues"
+Paper = "https://github.com/bytetoken/ByteToken/blob/main/paper/bytetoken_paper.md"
+
+[tool.setuptools.packages.find]
+include = ["bytetoken*"]
+exclude = ["tests*", "scripts*", "paper*", "formal*", "rust_core*"]
+
+[tool.setuptools.package-data]
+bytetoken = ["*.model", "atom_tables/*.json.gz"]
+
+[tool.pytest.ini_options]
+testpaths = ["bytetoken"]
+python_files = ["tests.py"]
+python_functions = ["test_*"]

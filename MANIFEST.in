@@ -1,0 +1,9 @@
+include LICENSE
+include README.md
+include pyproject.toml
+recursive-include bytetoken *.py *.model
+recursive-exclude tests *
+recursive-exclude scripts *
+recursive-exclude paper *
+recursive-exclude formal *
+recursive-exclude rust_core *

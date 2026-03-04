@@ -1,0 +1,14 @@
+[package]
+name = "bytetoken-native"
+version = "0.1.0"
+edition = "2021"
+description = "Native Rust core for ByteToken Protocol — 300x faster encode/decode"
+
+[lib]
+name = "bytetoken_native"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.22", features = ["extension-module"] }
+crc32fast = "1.4"
+numpy = "0.22.0"

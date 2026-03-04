@@ -1,0 +1,60 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{openai_tiktoken}
+\citation{bpe}
+\providecommand \oddpage@label [2]{}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
+\citation{base64}
+\citation{base32768}
+\citation{slim}
+\citation{binarybpe}
+\citation{metablt}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Background and Related Work}{2}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}BPE Tokenization}{2}{subsection.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Binary-to-Text Encoding for LLMs}{2}{subsection.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Non-Merging Atomic Tokens}{2}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Formal Definitions}{2}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Empirical Enumeration}{2}{subsection.3.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Non-Merging (NM) and Space-Prefixed Non-Merging (SP NM) token counts.}}{2}{table.1}\protected@file@percent }
+\newlabel{tab:vocab}{{1}{2}{Non-Merging (NM) and Space-Prefixed Non-Merging (SP NM) token counts}{table.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}The Space-Prefix Mechanism}{2}{subsection.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Encoding Modes}{2}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Standard Mode (15-bit)}{2}{subsection.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Universal Mode (13-bit)}{3}{subsection.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Direct ID Mode (16--17 bit)}{3}{subsection.4.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Direct ID Mode capacities.}}{3}{table.2}\protected@file@percent }
+\newlabel{tab:did}{{2}{3}{Direct ID Mode capacities}{table.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Formal Proofs}{3}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Optimality of 15-bit (String Mode)}{3}{subsection.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Optimality of 17-bit (Direct ID Mode)}{3}{subsection.5.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}BPE Fragmentation Map}{3}{subsection.5.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces BPE Fragmentation Map: Tokens per Character.}}{3}{table.3}\protected@file@percent }
+\newlabel{tab:fragmentation}{{3}{3}{BPE Fragmentation Map: Tokens per Character}{table.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Experiments and Results}{3}{section.6}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces End-to-End Pipeline Savings.}}{3}{table.4}\protected@file@percent }
+\newlabel{tab:pipeline}{{4}{3}{End-to-End Pipeline Savings}{table.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Comparison with Prior Art}{3}{section.7}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Comparison with Prior Art.}}{3}{table.5}\protected@file@percent }
+\newlabel{tab:prior_art}{{5}{3}{Comparison with Prior Art}{table.5}{}}
+\bibstyle{ieee_fullname}
+\bibcite{openai_tiktoken}{1}
+\bibcite{bpe}{2}
+\bibcite{base64}{3}
+\bibcite{base32768}{4}
+\bibcite{slim}{5}
+\bibcite{binarybpe}{6}
+\bibcite{metablt}{7}
+\@writefile{toc}{\contentsline {section}{\numberline {8}Conclusion}{4}{section.8}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces End-to-end ByteToken pipeline: raw binary data is optionally compressed (LZMA), chunked into fixed-width bit segments (15 or 17 bits), mapped to non-merging atoms via a lookup table, and transported through the LLM context window. On the receiving end, the reverse lookup reconstructs the original bytes losslessly.}}{5}{figure.1}\protected@file@percent }
+\newlabel{fig:pipeline_diagram}{{1}{5}{End-to-end ByteToken pipeline: raw binary data is optionally compressed (LZMA), chunked into fixed-width bit segments (15 or 17 bits), mapped to non-merging atoms via a lookup table, and transported through the LLM context window. On the receiving end, the reverse lookup reconstructs the original bytes losslessly}{figure.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces BPE Fragmentation Map: Tokens per Character.}}{6}{figure.2}\protected@file@percent }
+\newlabel{fig:fragmentation_map}{{2}{6}{BPE Fragmentation Map: Tokens per Character}{figure.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces End-to-End Pipeline Token Savings by Data Type}}{6}{figure.3}\protected@file@percent }
+\newlabel{fig:pipeline_savings}{{3}{6}{End-to-End Pipeline Token Savings by Data Type}{figure.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces ByteToken Streaming Architecture}}{6}{figure.4}\protected@file@percent }
+\newlabel{fig:streaming_architecture}{{4}{6}{ByteToken Streaming Architecture}{figure.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Encoding Method Comparison: Bits per Token}}{6}{figure.5}\protected@file@percent }
+\newlabel{fig:encoding_comparison}{{5}{6}{Encoding Method Comparison: Bits per Token}{figure.5}{}}
+\gdef \@abspage@last{6}

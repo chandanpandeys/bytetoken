@@ -1,0 +1,9 @@
+{
+  "tokenizer": "o200k_base",
+  "vocab_size": 200019,
+  "scanned_at": "2026-03-02T11:48:05Z",
+  "space_nonmerging_count": 105742,
+  "roundtrip_safe_count": 198424,
+  "space_max_bw": 16,
+  "did_max_bw": 17
+}
