@@ -1,4 +1,4 @@
-# ByteToken Protocol: Non-Merging Atomic Tokens for Optimal Binary Data Transport Through LLM Context Windows
+# ByteToken Protocol: Non-Merging Atomic Tokens for High-Density Binary Data Transport Through LLM Context Windows
 
 **Authors:** Chandan Pandey  
 **Date:** March 2026  
@@ -8,7 +8,7 @@
 
 ## Abstract
 
-We present the ByteToken Protocol, a novel method for encoding arbitrary binary data into LLM token sequences with provably optimal density. Our approach formalizes and exploits a structural property of BPE tokenizers: the existence of *non-merging atomic tokens* whose tokenization is invariant under concatenation. We identify three encoding modes achieving 15, 16, and 17 bits per token on OpenAI's `cl100k_base` and `o200k_base` tokenizers respectively. ByteToken acts as a standalone encoder yielding 44–51% raw token savings over Base64, and achieves up to **93.6% total token reduction** when chained with standard LZMA compression on structured data. We prove this density is the information-theoretic maximum for concatenation-safe encoding and demonstrate universality across all major tokenizer families (BPE, SentencePiece, byte-level). We release a complete open-source implementation with 21 passing tests, a multi-model bridge protocol supporting 11 architectures, and extensive empirical validation across 16 experiments producing 26 verified findings.
+We present the ByteToken Protocol, a novel method for encoding arbitrary binary data into LLM token sequences with optimality proved only under the explicitly defined concatenation-safe token-alphabet model. Our approach formalizes and exploits a structural property of BPE tokenizers: the existence of *non-merging atomic tokens* whose tokenization is invariant under concatenation. We identify three encoding modes achieving 15, 16, and 17 bits per token on OpenAI's `cl100k_base` and `o200k_base` tokenizers respectively. ByteToken acts as a standalone encoder yielding 44–51% raw token savings over Base64, and achieves up to **93.6% total token reduction** when chained with standard LZMA compression on structured data. We prove an upper bound under the explicitly defined concatenation-safe, independently decodable token-alphabet model, and evaluate the construction across selected tokenizer families. We release a complete open-source implementation with 21 passing tests, a multi-model bridge protocol supporting 11 architectures, and extensive empirical validation across 16 experiments producing 26 verified findings.
 
 **Keywords:** BPE tokenization, binary encoding, LLM efficiency, token optimization, context window utilization
 
@@ -20,7 +20,7 @@ Large Language Models (LLMs) process input as sequences of tokens, with costs di
 
 When such data must pass through an LLM's context window, it is typically encoded as Base64. Base64 expands binary data by 33% before tokenization and fragments unpredictably under BPE, yielding approximately 5.6 bits per token [1]. This inefficiency limits practical context capacity and becomes a severe cost driver at scale.
 
-We introduce the **ByteToken Protocol**, which achieves 15–17 bits per token by constructing an encoding alphabet from tokens that are provably atomic under the BPE merge algorithm. Our key contributions are:
+We introduce the **ByteToken Protocol**, which achieves high token density by constructing an encoding alphabet from tokens that are empirically validated to survive the required tokenizer boundary conditions. Our key contributions are:
 
 1. **Discovery of non-merging atoms:** We identify and formally characterize a class of BPE tokens whose tokenization is invariant under arbitrary concatenation (§3).
 2. **Three encoding modes** spanning different density/portability tradeoffs (§4):
@@ -140,13 +140,13 @@ This is the **highest achievable density** for any BPE-compatible encoding, as i
 
 ### 5.1 Optimality of 15-bit (String Mode)
 
-**Theorem 3 (String-Mode Optimality).** *15 bits per token is optimal for string-mode encoding using space-prefixed atoms on cl100k_base.*
+**Theorem 3 (String-Mode Optimality Under the Model).** *15 bits per token is optimal under the paper's independently decodable, concatenation-safe, space-prefixed-atom model for the tested `cl100k_base` vocabulary.*
 
 *Proof.* We enumerate all space-prefixed tokens in cl100k_base that satisfy the non-merging property: 44,367 tokens. Since $2^{15} = 32,768 \leq 44,367 < 65,536 = 2^{16}$, 15 bits is achievable. To show 16 bits is not achievable in string mode, we note that concatenating non-space-prefixed atoms in strings fails the round-trip test (Theorem 2), reducing the usable alphabet to $< 2^{16}$. □
 
-### 5.2 Optimality of 17-bit (Direct ID Mode)
+### 5.2 17-bit Density Bound for Direct ID Mode
 
-For Direct ID mode on o200k_base: 198,424 roundtrip-safe IDs satisfy $2^{17} = 131,072 \leq 198,424 < 262,144 = 2^{18}$. Since tokens that fail the roundtrip test (decode→encode ≠ identity) cannot be used, and only 198,424 survive, 17 bits is optimal.
+For Direct ID mode on o200k_base: 198,424 roundtrip-safe IDs satisfy $2^{17} = 131,072 \leq 198,424 < 262,144 = 2^{18}$. Within the independently addressable roundtrip-safe-token model, 17 bits is the largest fixed-width payload supported by the 198,424 safe IDs observed in `o200k_base`.
 
 ### 5.3 Computational Complexity
 
@@ -207,7 +207,7 @@ This map is itself a novel contribution, providing practitioners with guidance o
 
 ![LZMA + DirectID-17 achieves 90–97% token savings on structured data (JSON, CSV, logs, code) and 73% on random binary. Compression alone accounts for the majority of savings on structured data, while ByteToken encoding provides the base 49% improvement on incompressible data.](figures/pipeline_savings.png)
 
-**Finding:** LZMA + DirectID-17 is the universally optimal pipeline for structured data, achieving **90–97% token savings**.
+**Finding:** On the tested structured datasets, LZMA + DirectID-17 produced the lowest token counts among the compared pipelines. This is an empirical result for those datasets, not a universal optimum.
 
 **Experiment I: Streaming & API Simulation.**
 
@@ -232,9 +232,9 @@ We benchmark encode and decode latency (mean of 5 runs, single-threaded, consume
 ByteToken encoding is approximately 300× slower than Base64 due to the Python-level bit manipulation. However, even at 100 KB, the end-to-end latency (151 ms) is negligible compared to LLM API round-trip times (typically 1–10 seconds). A C/Rust implementation would eliminate this gap.
 
 *(Note: Enterprise cost projections and absolute financial impact estimates based on commercial API pricing models fall outside the scope of this performance benchmark, but are detailed in the project reference documentation.)*
-### 6.4 Cross-Tokenizer Universality (Experiment I-3)
+### 6.4 Cross-Tokenizer Evaluation (Experiment I-3)
 
-We prove that the non-merging property arises from a structural feature common to ALL BPE tokenizer families:
+We evaluate whether analogous boundary-marker behavior appears across several tokenizer families:
 
 | Family | Boundary Marker | Models | Predicted Bits/Token |
 |:-------|:---------------:|:------:|:--------------------:|
@@ -243,7 +243,7 @@ We prove that the non-merging property arises from a structural feature common t
 | WordPiece | ## suffix | BERT | 13–14 |
 | Unigram | ▁ prefix | mBART, XLNet | 13–15 |
 
-We confirm 22,700 boundary-marker atoms in o200k including non-space Unicode boundaries, validating that ByteToken is a **general principle**, not a tokenizer-specific trick.
+We confirm 22,700 boundary-marker atoms in o200k including non-space Unicode boundaries, supporting the hypothesis that analogous boundary markers may enable related constructions beyond the tested BPE tokenizers.
 
 ### 6.5 Ablation Study: Compression vs. Encoding
 
@@ -313,23 +313,23 @@ We identify the following limitations of the ByteToken Protocol, organized into 
 
 ### 9.1 Tokenizer & Protocol Fragility
 
-1. **Tokenizer-version dependence.** The non-merging atom set is empirically determined for a specific tokenizer version (e.g., `cl100k_base` v0.5.0). If OpenAI, Anthropic, or other providers retrain or modify their tokenizers, the atom set must be re-scanned. We provide tooling for this (`exp_e_formal_proofs.py`), but users must be aware of this maintenance requirement. The release of GPT-5 (August 2025) introduced `o200k_harmony`, a variant of the existing `o200k_base` encoding—any future tokenizer with a substantially different merge table (e.g., a hypothetical `o300k`) would require a full re-scan and potentially yield different optimal bit-widths. **[RESOLVED: `gpt5_scanner.py` auto-probes new tokenizer candidates]**
+1. **Tokenizer-version dependence.** The non-merging atom set is empirically determined for a specific tokenizer version (e.g., `cl100k_base` v0.5.0). If OpenAI, Anthropic, or other providers retrain or modify their tokenizers, the atom set must be re-scanned. We provide tooling for this (`exp_e_formal_proofs.py`), but users must be aware of this maintenance requirement. The release of GPT-5 (August 2025) introduced `o200k_harmony`, a variant of the existing `o200k_base` encoding—any future tokenizer with a substantially different merge table (e.g., a hypothetical `o300k`) would require a full re-scan and potentially yield different optimal bit-widths. **[MITIGATED: `gpt5_scanner.py` can probe tokenizer candidates; any new tokenizer still requires empirical validation]**
 
-2. **No formal proof from BPE axioms.** Theorem 1 (Non-Merging Preservation) relies on an empirical observation about space boundaries in BPE merge tables. While we verify this exhaustively across all tested tokenizers, we do not prove it from the axiomatic definition of BPE. Notably, recent work on Attention-Guided BPE (AG-BPE, August 2025) [23] introduces semantically-guided merge decisions using a lightweight Transformer encoder. Such merge strategies could violate the space-boundary assumption, as semantic merges may cross word boundaries that conventional BPE respects. **[RESOLVED: Lean4 formal specification with 3 theorems in `formal/ByteToken.lean`]**
+2. **No formal proof from BPE axioms.** Theorem 1 (Non-Merging Preservation) relies on an empirical observation about space boundaries in BPE merge tables. While we verify this exhaustively across all tested tokenizers, we do not prove it from the axiomatic definition of BPE. Notably, recent work on Attention-Guided BPE (AG-BPE, August 2025) [23] introduces semantically-guided merge decisions using a lightweight Transformer encoder. Such merge strategies could violate the space-boundary assumption, as semantic merges may cross word boundaries that conventional BPE respects. **[PARTIAL: Lean4 specifies the logical structure; the concrete tokenizer semantics are not fully machine-checked]**
 
-3. **Vendor lock-in risk.** The non-merging atom set is tokenizer-specific. If a cloud provider deprecates a tokenizer version (as OpenAI has done with `r50k_base` and `p50k_base`), pre-computed ByteToken alphabets become invalid with no automatic migration path. Users must re-run the atom discovery process and revalidate all cached encoded payloads. **[RESOLVED: `blt_bridge.py` auto-fallback across 11 models/4 architectures]**
+3. **Vendor lock-in risk.** The non-merging atom set is tokenizer-specific. If a cloud provider deprecates a tokenizer version (as OpenAI has done with `r50k_base` and `p50k_base`), pre-computed ByteToken alphabets become invalid with no automatic migration path. Users must re-run the atom discovery process and revalidate all cached encoded payloads. **[MITIGATED: `blt_bridge.py` provides configured fallbacks; compatibility remains model/version dependent]**
 
-4. **Reasoning-token billing distortion.** GPT-5+ models generate invisible "reasoning tokens" (also called "thinking tokens") that are billed but not visible in the output [24]. ByteToken savings calculations based on input token counts may overstate actual cost savings when reasoning tokens dominate billing. For a reasoning-heavy query, input token reduction of 93.6% may translate to only 20–40% total cost reduction when reasoning tokens account for 70–80% of billed tokens. **[RESOLVED: `scripts/validate_api_billing.py` confirms 44-48% real-world savings]**
+4. **Reasoning-token billing distortion.** GPT-5+ models generate invisible "reasoning tokens" (also called "thinking tokens") that are billed but not visible in the output [24]. ByteToken savings calculations based on input token counts may overstate actual cost savings when reasoning tokens dominate billing. For a reasoning-heavy query, input token reduction of 93.6% may translate to only 20–40% total cost reduction when reasoning tokens account for 70–80% of billed tokens. **[PARTIAL: billing validation covers the tested scenarios; provider/model pricing and reasoning-token effects remain workload dependent]**
 
 ### 9.2 Theoretical Gaps
 
-5. **No information-theoretic lower bound.** We show that 15/17 bits per token is optimal *for the specific tokenizers tested* (Theorem 3), but we provide no Shannon-entropy lower bound proving this is the fundamental limit for BPE-compatible encoding in general. A tighter bound derived from the structure of BPE merge tables may exist, and future tokenizers with larger vocabularies could enable 18+ bits per token. **[RESOLVED: `theory.py` proves tight bound floor(log2(|NM|)) — see Finding 24]**
+5. **No information-theoretic lower bound.** We show that 15/17 bits per token is optimal *for the specific tokenizers tested* (Theorem 3), but we provide no Shannon-entropy lower bound proving this is the fundamental limit for BPE-compatible encoding in general. A tighter bound derived from the structure of BPE merge tables may exist, and future tokenizers with larger vocabularies could enable 18+ bits per token. **[SCOPED: `theory.py` proves the bound within the stated token-alphabet model]**
 
-6. **Non-merging property is a training artifact, not an algorithmic invariant.** The space-boundary non-merging property arises because tokenizers are trained on whitespace-delimited natural language corpora. It is NOT a property of the BPE algorithm itself. Tokenizers trained on code (where spaces have different semantics—e.g., Python's significant whitespace), mathematical notation, or raw byte-level data could violate this property. The growing prevalence of code-focused LLMs (GPT-5.3-Codex-Spark, Claude Code) trained on code-heavy corpora increases this risk. **[RESOLVED: N-gram validation (100% safe at windows 2-5) across tested tokenizers]**
+6. **Non-merging property is a training artifact, not an algorithmic invariant.** The space-boundary non-merging property arises because tokenizers are trained on whitespace-delimited natural language corpora. It is NOT a property of the BPE algorithm itself. Tokenizers trained on code (where spaces have different semantics—e.g., Python's significant whitespace), mathematical notation, or raw byte-level data could violate this property. The growing prevalence of code-focused LLMs (GPT-5.3-Codex-Spark, Claude Code) trained on code-heavy corpora increases this risk. **[CHARACTERIZED: tested N-gram safety; generality beyond the tested tokenizers remains open]**
 
-7. **No analysis of BPE-dropout effects.** BPE-dropout [13] introduces stochastic subword segmentation during training. Models trained with BPE-dropout may exhibit different merging behavior at inference time, as the dropout-regularized model has learned to handle multiple possible segmentations of the same input. Whether the non-merging property is preserved under BPE-dropout inference modes remains unverified. **[RESOLVED: `dropout_analysis.py` — 100% stable at inference (dropout=0), see Finding 25]**
+7. **No analysis of BPE-dropout effects.** BPE-dropout [13] introduces stochastic subword segmentation during training. Models trained with BPE-dropout may exhibit different merging behavior at inference time, as the dropout-regularized model has learned to handle multiple possible segmentations of the same input. Whether the non-merging property is preserved under BPE-dropout inference modes remains unverified. **[CHARACTERIZED: standard deterministic inference is stable in the tested setting]**
 
-8. **No end-to-end validation with all claimed tokenizer families.** While we confirm the non-merging property for tiktoken tokenizers (GPT-4, GPT-4o), the SentencePiece and WordPiece predictions in §6.4 are based on structural analysis of the tokenizer algorithms, not empirical verification with complete encoders. The SentencePiece `▁` prefix and WordPiece `##` suffix mechanisms are structurally analogous to the space prefix, but boundary behavior may differ in edge cases involving Unicode normalization or locale-specific tokenization rules. **[RESOLVED: `SentencePieceByteTokenEncoder` validates 400 atoms, 8-bit encoding]**
+8. **No end-to-end validation with all claimed tokenizer families.** While we confirm the non-merging property for tiktoken tokenizers (GPT-4, GPT-4o), the SentencePiece and WordPiece predictions in §6.4 are based on structural analysis of the tokenizer algorithms, not empirical verification with complete encoders. The SentencePiece `▁` prefix and WordPiece `##` suffix mechanisms are structurally analogous to the space prefix, but boundary behavior may differ in edge cases involving Unicode normalization or locale-specific tokenization rules. **[PARTIAL: a SentencePiece encoder is implemented and tested on the included configuration]**
 
 ### 9.3 Engineering Limitations
 
@@ -337,15 +337,15 @@ We identify the following limitations of the ByteToken Protocol, organized into 
 
 10. **Encoding overhead.** The Python implementation is approximately 300× slower than Base64 due to Python-level bit manipulation (§6.3). At 100KB, encoding takes ~420ms and decoding takes ~735ms. While negligible compared to LLM API latency (1–10s), this overhead is non-negligible for latency-sensitive applications such as real-time voice, streaming chat, or high-throughput batch processing pipelines. **[RESOLVED: `rust_core/` (native PyO3 extension) achieves a full ~300× speedup using 120-bit vectorized unrolling and zero-copy NumPy arrays]**
 
-11. **No error correction or detection.** ByteToken provides zero-redundancy encoding. A single bit flip in the encoded output corrupts the entire downstream byte sequence from that point forward. No checksums, parity bits, or error-correcting codes are included. In transport channels subject to noise—including LLM hallucination (where the model may alter a token during generation), network corruption, or prompt truncation—this is a critical weakness. The protocol assumes perfect token-level transport fidelity. **[RESOLVED: `ErrorDetectingEncoder` adds CRC-32 checksums with 3.96% token overhead]**
+11. **No error correction or detection.** ByteToken provides zero-redundancy encoding. A single bit flip in the encoded output corrupts the entire downstream byte sequence from that point forward. No checksums, parity bits, or error-correcting codes are included. In transport channels subject to noise—including LLM hallucination (where the model may alter a token during generation), network corruption, or prompt truncation—this is a critical weakness. The protocol assumes perfect token-level transport fidelity. **[MITIGATED: `ErrorDetectingEncoder` adds CRC-32 detection; it does not provide error correction]**
 
-12. **Memory footprint during atom discovery.** The atom discovery scan loads the full tokenizer vocabulary (~200K entries for `o200k_base`) and performs per-token roundtrip tests. On memory-constrained environments (serverless functions with 128–256MB RAM, edge devices, browser-based WebAssembly), this initialization may fail or timeout. The current implementation provides no mechanism for lazy or incremental atom discovery. **[RESOLVED: `lazy_discovery.py` — 3 strategies: pre-computed (0ms), chunked (2.21MB), generator (1.14MB), see Finding 26]**
+12. **Memory footprint during atom discovery.** The atom discovery scan loads the full tokenizer vocabulary (~200K entries for `o200k_base`) and performs per-token roundtrip tests. On memory-constrained environments (serverless functions with 128–256MB RAM, edge devices, browser-based WebAssembly), this initialization may fail or timeout. The current implementation provides no mechanism for lazy or incremental atom discovery. **[MITIGATED: `lazy_discovery.py` provides precomputed and streaming discovery strategies]**
 
-13. **No support for multimodal tokenizers.** Vision-language models (GPT-4V, Gemini 2.5 Pro, Claude 3.5 Sonnet) use specialized multimodal tokenizers that encode image patches, audio frames, and video segments alongside text tokens. ByteToken has zero analysis of whether the non-merging property holds for multimodal token vocabularies, and no mechanism to encode binary data into the image/audio token space. **[RESOLVED: `MultimodalTokenizerAnalyzer` confirms SAFE — no atom overlap with multimodal ranges, see Finding 23]**
+13. **No support for multimodal tokenizers.** Vision-language models (GPT-4V, Gemini 2.5 Pro, Claude 3.5 Sonnet) use specialized multimodal tokenizers that encode image patches, audio frames, and video segments alongside text tokens. ByteToken has zero analysis of whether the non-merging property holds for multimodal token vocabularies, and no mechanism to encode binary data into the image/audio token space. **[OPEN / PARTIAL: multimodal behavior has not been comprehensively validated]**
 
 ### 9.4 Ecosystem & Competitive Risks
 
-14. **Byte Latent Transformer (BLT) obsolescence risk.** Meta's BLT architecture [8] bypasses BPE tokenization entirely, processing raw bytes with dynamically-sized patches and allocating compute based on byte-sequence entropy. BLT models have demonstrated performance parity with token-based models (e.g., Llama 3) at up to 50% less inference compute. If BLT-style architectures become dominant in production LLM deployments, ByteToken's BPE-specific optimization becomes irrelevant—there are no tokens to optimize. Similarly, Aleph Alpha's T-Free architecture (announced January 2025) eliminates the tokenizer entirely. **[RESOLVED: `BLTBridge` gracefully degrades to raw byte pass-through for BLT/T-Free models]**
+14. **Byte Latent Transformer (BLT) obsolescence risk.** Meta's BLT architecture [8] bypasses BPE tokenization entirely, processing raw bytes with dynamically-sized patches and allocating compute based on byte-sequence entropy. BLT models have demonstrated performance parity with token-based models (e.g., Llama 3) at up to 50% less inference compute. If BLT-style architectures become dominant in production LLM deployments, ByteToken's BPE-specific optimization becomes irrelevant—there are no tokens to optimize. Similarly, Aleph Alpha's T-Free architecture (announced January 2025) eliminates the tokenizer entirely. **[MITIGATED: `BLTBridge` can fall back to raw-byte handling for configured byte-level profiles]**
 
 15. **KV-cache binary transport.** Emerging research demonstrates direct Key-Value cache passing between LLM agents using a binary wire format, achieving 73–78% token savings and 2–4× speedup by preventing redundant re-tokenization across agent hops. This approach skips both tokenization AND encoding, potentially offering superior efficiency for multi-agent architectures deployed on self-hosted models with KV-cache access. ByteToken's advantage is API-level compatibility (no model internals required), but for organizations with full model access, KV-cache transport may be strictly superior. **[RESOLVED: Complementary positioning — ByteToken for APIs, KV-cache for self-hosted; `BLTBridge` covers both]**
 
