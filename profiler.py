@@ -100,8 +100,9 @@ class ContextProfiler:
             "base64_inefficiency": {
                 "detected_blobs": len(base64_blobs),
                 "total_base64_tokens": b64_tokens_total,
-                "potential_savings_tokens": b64_savings_potential,
-                "potential_savings_pct": round(b64_savings_potential / b64_tokens_total * 100, 1) if b64_tokens_total else 0
+                "potential_savings_tokens": None,
+                "potential_savings_pct": None,
+                "note": "Base64 detection is measured; ByteToken savings require re-encoding the decoded payload with the target tokenizer. No fixed ratio is assumed here."
             },
             "recommendations": self._generate_recommendations(total_tokens, tool_tokens_total, b64_tokens_total)
         }
@@ -115,8 +116,8 @@ class ContextProfiler:
             )
         if b64_toks > 500:
             recs.append(
-                f"Detected {b64_toks:,} tokens in raw Base64 strings. "
-                f"ByteToken wire encoding can save ~38% of these tokens."
+                f"Detected {b64_toks:,} tokens in Base64 strings. "
+                "Run a real ByteToken encode + target-tokenizer count before estimating savings."
             )
         if total > 50000:
             recs.append(
