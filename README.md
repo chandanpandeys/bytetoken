@@ -37,7 +37,9 @@ If your AI agents exchange database snapshots, embeddings, AST diffs, or images 
 ## ⚡ Quick Start
 
 ```bash
-pip install bytetoken
+git clone https://github.com/chandanpandeys/bytetoken.git
+cd bytetoken
+pip install -e ".[all,dev]"
 ```
 
 ### 1. MCP Tool Decorator (Auto-Compression on the Wire)
