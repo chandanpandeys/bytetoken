@@ -1,9 +1,13 @@
 include LICENSE
 include README.md
 include pyproject.toml
-recursive-include bytetoken *.py *.model *.json.gz *.c *.pyd
-recursive-include bytetoken/atom_tables *.json.gz *.json
-recursive-include bytetoken/rust_core Cargo.toml Cargo.lock src/*.rs
+include __init__.py
+include __main__.py
+include *.py
+include *.c
+recursive-include atom_tables *.json.gz *.json
+recursive-include rust_core Cargo.toml Cargo.lock src/*.rs
+recursive-include js *
 recursive-exclude bytetoken/rust_core/target *
 recursive-exclude tests *
 recursive-exclude paper *.aux *.log *.out
