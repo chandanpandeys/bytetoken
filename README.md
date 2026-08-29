@@ -3,9 +3,9 @@
   <br>
   <p><b>High-Efficiency Wire Transport & Context Optimizer for AI Agents and MCP Servers.</b></p>
 
-  [![PyPI Version](https://img.shields.io/pypi/v/bytetoken?color=blue)](https://pypi.org/project/bytetoken/)
+  
   [![GitHub Repo](https://img.shields.io/badge/github-chandanpandeys%2Fbytetoken-blue)](https://github.com/chandanpandeys/bytetoken)
-  [![Tests](https://img.shields.io/badge/tests-18%2F18%20core%20passing-brightgreen)]()
+  [![CI](https://github.com/chandanpandeys/bytetoken/actions/workflows/ci.yml/badge.svg)](https://github.com/chandanpandeys/bytetoken/actions/workflows/ci.yml)
   [![Python](https://img.shields.io/badge/python-3.8+-blue)]()
   [![License](https://img.shields.io/badge/license-MIT-green)]()
 </div>
