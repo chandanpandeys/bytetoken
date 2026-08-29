@@ -23,7 +23,7 @@ If your AI agents exchange database snapshots, embeddings, AST diffs, or images 
 *Tested on real-world developer payloads using live tokenizer encoding ([reproduce benchmark](benchmarks/benchmark_realworld.py)):*
 
 | Payload Type | Raw Size | Base64 (Tokens) | ByteToken-15 (Tokens) | LZMA + ByteToken (Tokens) | Total Savings vs Base64 |
-|:---|:---:|:---:|:---:|:---:|
+|:---|:---:|:---:|:---:|:---:|:---:|
 | **JSON API Response** (100 records) | 21.4 KB | 18,574 | 11,919 *(−35.8%)* | **728** | **96.1%** |
 | **Pytest Output** (50 tests) | 3.2 KB | 2,904 | 1,854 *(−36.2%)* | **235** | **91.9%** |
 | **CSV Analytics** (500 rows) | 27.1 KB | 24,524 | 14,924 *(−39.1%)* | **885** | **96.4%** |
