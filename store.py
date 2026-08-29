@@ -15,18 +15,18 @@ Usage:
 import hashlib
 import re
 import time
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Union
 
 
 class ArtifactStore:
     """
-    In-memory / disk-backed store for large agent artifacts.
+    In-memory artifact store for large agent outputs.\n\n    Note: despite the module-level description, this implementation does not\n    currently persist artifacts to disk; all artifacts live in process memory.
     """
 
     def __init__(self):
         self._artifacts: Dict[str, Dict[str, Any]] = {}
 
-    def put(self, content: str | bytes, mime_type: str = "text/plain", metadata: Optional[Dict] = None) -> str:
+    def put(self, content: Union[str, bytes], mime_type: str = "text/plain", metadata: Optional[Dict] = None) -> str:
         """Store an artifact and return a unique handle."""
         if isinstance(content, str):
             data_bytes = content.encode("utf-8")
