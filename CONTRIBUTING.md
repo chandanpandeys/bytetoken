@@ -16,12 +16,12 @@ pip install -e .[dev,all]
 
 Run tests:
 ```bash
-python -m bytetoken.tests
+python -m pytest tests.py -v
 ```
 
 Run real-world benchmarks:
 ```bash
-python bytetoken/benchmarks/benchmark_realworld.py
+python benchmarks/benchmark_realworld.py
 ```
 
 ### 2. TypeScript / Node.js Environment
@@ -37,13 +37,13 @@ node --experimental-strip-types tests/index.test.ts
 
 - **Python**: Follow PEP 8. Type hints are encouraged across public APIs.
 - **Rust Backend**: All performance-critical native extensions live in `rust_core/`. Use `cargo fmt` and `cargo clippy`.
-- **TypeScript**: Strict TypeScript in `js/src/`. Ensure 100% test coverage for encoding/decoding.
+- **TypeScript**: Strict TypeScript in `js/src/`. Add or update tests for encoding/decoding changes.
 
 ---
 
 ## Pull Request Guidelines
 
-1. Fork the repo and create your branch from `master`.
+1. Fork the repo and create your branch from `main`.
 2. Ensure all tests pass locally before submitting.
 3. If you add new tokenizer support or encoding features, include unit tests and update benchmark tables if applicable.
 
