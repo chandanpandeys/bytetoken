@@ -4,10 +4,10 @@ ByteToken Native Encoder — Backend Selector
 Auto-detects the best available encoder backend and provides a unified API.
 
 Backend priority (fastest first):
-  1. Rust PyO3 extension (Zero-Copy) — ~300x Python baseline  [requires Rust / numpy]
-  2. CFFI C extension (_native.pyd)  — ~45x Python baseline   [requires MSVC / gcc]
-  3. NumPy vectorized                — ~84x Python baseline   [requires numpy, no compiler]
-  4. fast.py struct-based            — ~3-10x Python baseline [stdlib only]
+  1. Rust PyO3 extension (Zero-Copy) — benchmark locally; performance is workload-dependent
+  2. CFFI C extension (_native.pyd)  — benchmark locally
+  3. NumPy vectorized                — benchmark locally
+  4. fast.py struct-based            — benchmark locally
   5. Pure Python (core.py)           — 1x baseline            [always available]
 
 To build the Rust PyO3 extension:
@@ -232,10 +232,10 @@ if __name__ == "__main__":
         print(f"  CFFI C ext.     : {info['cffi_available']}")
         print()
         expected_speedup = {
-            "rust_pyo3": "~300x",
-            "cffi_c": "~15x",
-            "numpy":  "~11x",
-            "fast":   "~3x",
-            "python": "1x (baseline)",
+            "rust_pyo3": "benchmark locally",
+            "cffi_c": "benchmark locally",
+            "numpy":  "benchmark locally",
+            "fast":   "benchmark locally",
+            "python": "baseline",
         }
         print(f"  Expected speedup: {expected_speedup.get(info['backend'], '?')}")
