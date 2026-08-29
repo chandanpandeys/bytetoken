@@ -2,8 +2,8 @@
 ByteToken Protocol
 ==================
 Token-efficient binary encoding for LLM context windows.
-Achieves 15-17 bits/token vs Base64's 5.6 bits/token.
-Provably optimal — no encoding scheme can beat this density.
+Achieves high token density on the tested tokenizer configurations.
+Optimality claims are scoped to the encoding model and tokenizer defined in the paper.
 
 Quick Start::
 
@@ -16,7 +16,7 @@ Modes::
 
     encoded = bytetoken.encode(b"data", mode="universal")   # 13-bit, all LLMs
     encoded = bytetoken.encode(b"data", mode="standard")    # 15-bit, OpenAI
-    encoded = bytetoken.encode(b"data", mode="direct_id")   # 17-bit, max density
+    encoded = bytetoken.encode(b"data", mode="direct_id")   # highest-density mode
 
 Advanced (class-based)::
 
