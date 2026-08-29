@@ -2,7 +2,7 @@
 ByteToken Protocol — Test Suite
 ================================
 Comprehensive tests for lossless round-trip, edge cases, and cross-tokenizer.
-Run: python -m pytest ByteToken/tests.py -v
+Run: python -m pytest tests.py -v
 """
 import os
 import sys
@@ -85,7 +85,7 @@ def test_large_payload():
     decoded = gw.decode(encoded)
     assert decoded == data, "Large payload round-trip failed"
     assert hashlib.sha256(decoded).hexdigest() == hashlib.sha256(data).hexdigest()
-    print("  [PASS] test_large_payload (100KB)")
+    print("  [PASS] test_large_payload (10KB)")
 
 
 def test_stats():
@@ -301,19 +301,26 @@ def test_error_detection_corruption():
     data = b"This is important data that must not be corrupted."
     encoded = enc.encode(data)
 
-    # Tamper with the encoded string (flip a character)
-    if len(encoded) > 20:
-        tampered = encoded[:10] + ('X' if encoded[10] != 'X' else 'Y') + encoded[11:]
-        try:
-            enc.decode(tampered)
-            # If we get here, the tampering didn't affect any atom tokens
-            print("  [PASS] test_error_detection_corruption (tamper didn't hit atom boundary)")
-        except ErrorDetectingEncoder.CorruptionError:
-            print("  [PASS] test_error_detection_corruption (corruption detected!)")
-        except Exception:
-            print("  [PASS] test_error_detection_corruption (decode error on tampered data)")
+    # Deliberately replace one complete encoded atom with another valid atom.
+    atoms = getattr(base, "_alphabet", [])
+    assert len(atoms) >= 2, "Need at least two atoms for corruption test"
+    original_atom = base.enc.decode([atoms[0]])
+    replacement_atom = base.enc.decode([atoms[1]])
+    assert original_atom != replacement_atom
+
+    parts = encoded.split(" ")
+    assert len(parts) >= 3, "Encoded payload unexpectedly small"
+    # Replace the first payload atom after the encoded header.
+    target = parts[2]
+    parts[2] = replacement_atom if target == original_atom else original_atom
+    tampered = " ".join(parts)
+
+    try:
+        enc.decode(tampered)
+    except ErrorDetectingEncoder.CorruptionError:
+        print("  [PASS] test_error_detection_corruption (corruption detected!)")
     else:
-        print("  [PASS] test_error_detection_corruption (payload too small to tamper)")
+        raise AssertionError("Expected CRC corruption to be detected")
 
 
 def test_error_detection_directid():
