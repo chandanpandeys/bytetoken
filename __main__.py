@@ -101,10 +101,34 @@ def cmd_info(args):
                 print(f"  {label:<40} {e}")
 
 
+def cmd_profile(args):
+    from bytetoken.profiler import profile_file
+    import json
+    
+    print(f"ByteToken Context Profiler — Analyzing: {args.session_file}")
+    print("=" * 70)
+    try:
+        report = profile_file(args.session_file, tokenizer_name=args.model)
+        print(f"Total Session Tokens:       {report['total_tokens']:,}")
+        print(f"Message Turns:              {report['message_count']}")
+        print(f"Tool Outputs Count:         {report['tool_output_summary']['count']}")
+        print(f"Tool Output Tokens:         {report['tool_output_summary']['total_tokens']:,} ({report['tool_output_summary']['pct_of_total']}%)")
+        print(f"Base64 Inefficiency Tokens: {report['base64_inefficiency']['total_base64_tokens']:,}")
+        print(f"Potential Token Savings:    {report['base64_inefficiency']['potential_savings_tokens']:,} ({report['base64_inefficiency']['potential_savings_pct']}%)")
+        
+        if report["recommendations"]:
+            print("\nRecommendations:")
+            for r in report["recommendations"]:
+                print(f"  • {r}")
+        print("=" * 70)
+    except Exception as e:
+        print(f"Error profiling session: {e}")
+
+
 def main():
     parser = argparse.ArgumentParser(
-        prog='ByteToken',
-        description='ByteToken Protocol: Token-efficient binary encoding for LLMs'
+        prog='bytetoken',
+        description='ByteToken Protocol: High-efficiency wire transport & context optimizer for AI agents'
     )
     sub = parser.add_subparsers(dest='command')
 
@@ -124,6 +148,11 @@ def main():
     p_bench.add_argument('--size', type=int, default=10000, help='Payload size in bytes')
     p_bench.add_argument('--tokenizer', default='cl100k_base', help='Tokenizer name')
 
+    # profile
+    p_prof = sub.add_parser('profile', help='Profile an agent conversation JSON log for wasted context')
+    p_prof.add_argument('session_file', help='JSON file containing conversation messages')
+    p_prof.add_argument('--model', default='o200k_base', help='Tokenizer model (default: o200k_base)')
+
     # info
     sub.add_parser('info', help='Show tokenizer info and atom counts')
 
@@ -134,6 +163,8 @@ def main():
         cmd_decode(args)
     elif args.command == 'bench':
         cmd_bench(args)
+    elif args.command == 'profile':
+        cmd_profile(args)
     elif args.command == 'info':
         cmd_info(args)
     else:

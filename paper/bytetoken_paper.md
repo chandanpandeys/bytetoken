@@ -8,7 +8,7 @@
 
 ## Abstract
 
-We present the ByteToken Protocol, a novel method for encoding arbitrary binary data into LLM token sequences with provably optimal density. Our approach exploits a previously undocumented structural property of BPE tokenizers: the existence of *non-merging atomic tokens* whose tokenization is invariant under concatenation. We identify three encoding modes achieving 15, 16, and 17 bits per token on OpenAI's `cl100k_base` and `o200k_base` tokenizers respectively, representing 44–51% raw token savings over Base64. We prove this density is the information-theoretic maximum for concatenation-safe encoding and demonstrate universality across all major tokenizer families (BPE, SentencePiece, byte-level). Combined with adaptive compression, ByteToken achieves up to **93.6% token reduction** on structured data. We release a complete open-source implementation with 21 passing tests, a multi-model bridge protocol supporting 11 architectures, and extensive empirical validation across 16 experiments producing 26 verified findings.
+We present the ByteToken Protocol, a novel method for encoding arbitrary binary data into LLM token sequences with provably optimal density. Our approach formalizes and exploits a structural property of BPE tokenizers: the existence of *non-merging atomic tokens* whose tokenization is invariant under concatenation. We identify three encoding modes achieving 15, 16, and 17 bits per token on OpenAI's `cl100k_base` and `o200k_base` tokenizers respectively. ByteToken acts as a standalone encoder yielding 44–51% raw token savings over Base64, and achieves up to **93.6% total token reduction** when chained with standard LZMA compression on structured data. We prove this density is the information-theoretic maximum for concatenation-safe encoding and demonstrate universality across all major tokenizer families (BPE, SentencePiece, byte-level). We release a complete open-source implementation with 21 passing tests, a multi-model bridge protocol supporting 11 architectures, and extensive empirical validation across 16 experiments producing 26 verified findings.
 
 **Keywords:** BPE tokenization, binary encoding, LLM efficiency, token optimization, context window utilization
 
@@ -16,7 +16,9 @@ We present the ByteToken Protocol, a novel method for encoding arbitrary binary 
 
 ## 1. Introduction
 
-Large Language Models (LLMs) process input as sequences of tokens, with costs directly proportional to token count. When binary data—images, compressed files, serialized objects—must pass through an LLM's context window, it is typically encoded as Base64, which expands data by 33% before tokenization and fragments unpredictably under BPE, yielding approximately 5.6 bits per token [1]. This inefficiency becomes a significant cost driver at scale.
+Large Language Models (LLMs) process input as sequences of tokens, with costs directly proportional to token count. The demand for transporting non-textual or densely structured data across LLM APIs has surged with the adoption of agentic architectures and tool-calling interfaces. Critical use cases require transmitting bytes identically through the context window, including: (1) Agents exchanging compiled binaries or WASM payloads for execution in sandboxed interpreters; (2) Losslessly passing massive serialized JSON/CSV state arrays between disconnected models; and (3) Transporting high-fidelity document embeddings or ciphertexts through third-party LLM middleware without semantic interference. 
+
+When such data must pass through an LLM's context window, it is typically encoded as Base64. Base64 expands binary data by 33% before tokenization and fragments unpredictably under BPE, yielding approximately 5.6 bits per token [1]. This inefficiency limits practical context capacity and becomes a severe cost driver at scale.
 
 We introduce the **ByteToken Protocol**, which achieves 15–17 bits per token by constructing an encoding alphabet from tokens that are provably atomic under the BPE merge algorithm. Our key contributions are:
 
@@ -51,7 +53,11 @@ Byte Pair Encoding (BPE) [2] iteratively merges the most frequent adjacent byte/
 
 **Meta BLT** (FAIR, 2025) [8] proposes byte-level transformers that bypass tokenization entirely, representing the state of the art at 77.5/100.
 
-Our work differs fundamentally from all prior approaches by identifying and proving the non-merging atomic property, achieving the highest known bits-per-token ratio for any BPE-compatible encoding.
+### 2.3 Prompt Compression and Semantic Methods
+
+Recent work on context compression, such as LLMLingua [25] and In-Context Autoencoder (ICAE) [26], reduces token constraints by discarding semantically redundant tokens or projecting context into continuous soft-prompt embeddings. These approaches are inherently lossy, computationally intensive (requiring local models to grade perplexity or access embedding layers), and optimized strictly for natural language. Similarly, generative steganography in LLMs [27] hides information within the statistical choice of generated semantic tokens. 
+
+Our work differs fundamentally from all prior approaches. Rather than compressing semantic meaning or requiring architectural model changes, ByteToken guarantees the lossless transport of arbitrary binary structures through discrete API token boundaries by formalizing and exploiting the non-merging atomic property.
 
 ---
 
@@ -225,21 +231,7 @@ We benchmark encode and decode latency (mean of 5 runs, single-threaded, consume
 
 ByteToken encoding is approximately 300× slower than Base64 due to the Python-level bit manipulation. However, even at 100 KB, the end-to-end latency (151 ms) is negligible compared to LLM API round-trip times (typically 1–10 seconds). A C/Rust implementation would eliminate this gap.
 
-**Enterprise cost projection.** We calculate the annual savings for an enterprise making 1,000 GPT-4o API calls per day, each sending a 10 KB JSON payload:
-
-```
-Base64 tokens per call:     5,182 tokens (measured, Table §6.3)
-ByteToken tokens per call:    152 tokens (LZMA + DID-17, Table §6.3)
-Token savings per call:     5,030 tokens
-
-GPT-4o input pricing:       $2.50 / 1M tokens
-Daily savings:              1,000 calls × 5,030 tokens × $2.50/1M = $12.58/day
-Annual savings:             $12.58 × 365 = $4,590/year
-
-At 10,000 calls/day:        $45,900/year
-At 100,000 calls/day:       $459,000/year
-```
-
+*(Note: Enterprise cost projections and absolute financial impact estimates based on commercial API pricing models fall outside the scope of this performance benchmark, but are detailed in the project reference documentation.)*
 ### 6.4 Cross-Tokenizer Universality (Experiment I-3)
 
 We prove that the non-merging property arises from a structural feature common to ALL BPE tokenizer families:
@@ -264,7 +256,7 @@ To isolate the contribution of each pipeline component, we measure token counts 
 | LZMA compression + Base64 (no ByteToken) | 382 | 88.2% |
 | **LZMA + ByteToken DirectID-17 (full pipeline)** | **207** | **93.6%** |
 
-**Finding:** On structured data, compression contributes the majority of savings (~88%). ByteToken encoding contributes an additional ~45% on top of Base64. When combined, the two techniques are multiplicative, not additive — the full pipeline achieves 93.6% total savings. On incompressible data (random bytes), ByteToken alone provides the entire benefit (45–49%).
+**Finding:** On structured data, compression contributes the majority of the *total* nominal token savings (~88% over raw text). However, ByteToken solves a separate problem: transport inefficiency via BPE boundaries. Applying ByteToken to the compressed payload provides an orthogonal ~45% continuous improvement over using Base64 to transport that same compressed payload. The two techniques address separate problem domains (data redundancy vs. transport fragmentation) and combine multiplicatively to reach the 93.6% limit. On incompressible data (random bytes), ByteToken alone provides the entire 45–49% benefit.
 
 ### 6.6 Edge Case Analysis
 
@@ -582,6 +574,12 @@ ByteToken operates in a rapidly evolving ecosystem. We identify the key alternat
 [23] Chen, L., et al. (2025). "Attention-Guided BPE: Semantically-Aware Subword Tokenization." Hugging Face Research, August 2025.
 
 [24] OpenAI. (2025). "GPT-5 Model Card: Reasoning Tokens and Billing." OpenAI Documentation, August 2025.
+
+[25] Jiang, H. et al. (2023). "LLMLingua: Compressing Prompts for Accelerated Inference of Large Language Models." In *Proceedings of EMNLP 2023*.
+
+[26] Ge, T. et al. (2023). "In-Context Autoencoder for Context Compression in a Large Language Model." *arXiv preprint*.
+
+[27] Zhang, Y. et al. (2023). "Provably Secure Generative Steganography in Practice." *arXiv preprint*.
 
 ---
 

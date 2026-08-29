@@ -1,59 +1,36 @@
 <div align="center">
   <img src="assets/banner.png" alt="ByteToken Logo" width="800">
   <br>
-  <p><b>Transport huge binary payloads through LLM context windows at a fraction of the cost.</b></p>
+  <p><b>High-Efficiency Wire Transport & Context Optimizer for AI Agents and MCP Servers.</b></p>
 
   [![PyPI Version](https://img.shields.io/pypi/v/bytetoken?color=blue)](https://pypi.org/project/bytetoken/)
-  [![Downloads](https://static.pepy.tech/badge/bytetoken)](https://pepy.tech/project/bytetoken)
-  [![CI](https://github.com/bytetoken/ByteToken/actions/workflows/ci.yml/badge.svg)](https://github.com/bytetoken/ByteToken/actions/workflows/ci.yml)
-  [![Tests](https://img.shields.io/badge/tests-21%2F21%20passing-brightgreen)]()
+  [![GitHub Repo](https://img.shields.io/badge/github-chandanpandeys%2Fbytetoken-blue)](https://github.com/chandanpandeys/bytetoken)
+  [![Tests](https://img.shields.io/badge/tests-18%2F18%20core%20passing-brightgreen)]()
   [![Python](https://img.shields.io/badge/python-3.8+-blue)]()
   [![License](https://img.shields.io/badge/license-MIT-green)]()
 </div>
 
 ---
 
-**ByteToken** is a formally-verified encoding protocol that achieves **up to 97% fewer tokens** than sending raw text or Base64 data to LLM APIs like OpenAI, Anthropic, and Google Gemini.
+**ByteToken** is a high-performance wire transport protocol and context optimization toolkit for AI agents. By exploiting **105,742 non-merging atomic tokens** in modern BPE tokenizers (`o200k_base`), ByteToken achieves **15 to 17 bits per token** with zero string fragmentation—saving **35% to 48% tokens** on raw binary data and **91% to 96%** on structured JSON/logs when paired with LZMA compression.
 
-If your application sends massive JSON arrays, compiled binaries, images, or documents to an LLM for processing via Function Calling/Tools, ByteToken effectively multiplies your available context window and reduces your API usage costs.
-
----
-
-## Table of Contents
-
-- [Why ByteToken?](#-why-bytetoken)
-- [Quick Start](#-quick-start)
-- [Use Cases](#-use-cases)
-- [Encoding Modes](#-encoding-modes)
-- [Adaptive Encoding](#-adaptive-encoding)
-- [Command-Line Interface](#-command-line-interface)
-- [Advanced Usage](#-advanced-features)
-- [API Reference](#-api-reference)
-- [Architecture](#-architecture)
-- [Roadmap](#-roadmap)
-- [Research Paper](#-the-research-paper)
-- [Contributing](#-contributing)
+If your AI agents exchange database snapshots, embeddings, AST diffs, or images over **Model Context Protocol (MCP)** or remote API tool calls, ByteToken prevents Base64 token explosion and keeps your context clean.
 
 ---
 
-## 💸 Why ByteToken?
+## 📊 Measured Benchmark (o200k_base / GPT-4o Tokenizer)
 
-Base64 expands binary data by 33%, and then LLM tokenizers (like BPE) absolutely shred that string, resulting in terrible efficiency (~5.6 bits per token). 
+*Tested on real-world developer payloads using live tokenizer encoding ([reproduce benchmark](benchmarks/benchmark_realworld.py)):*
 
-ByteToken mathematically guarantees **15 to 17 bits per token** by exploiting "non-merging atomic tokens." We [proved this is the theoretical maximum](paper/bytetoken_paper.md) — no encoding scheme can beat it.
-
-### Real-World Savings
-
-**On a 1MB JSON payload (GPT-4.5 at $75/1M input tokens):**
-*   **Base64:** ~380,000 tokens → **$28.50 per API call**
-*   **ByteToken + LZMA:** ~25,000 tokens → **$1.88 per API call** (93.6% fewer tokens)
-*   **Savings:** **$26.62 saved per single API call.**
-
-*For an enterprise making 1,000 of these calls a day, that's **$9.7M saved annually**.*
-
-<div align="center">
-  <img src="assets/chart.png" alt="93% Token Reduction Chart" width="600">
-</div>
+| Payload Type | Raw Size | Base64 (Tokens) | ByteToken-15 (Tokens) | LZMA + ByteToken (Tokens) | Total Savings vs Base64 |
+|:---|:---:|:---:|:---:|:---:|
+| **JSON API Response** (100 records) | 21.4 KB | 18,574 | 11,919 *(−35.8%)* | **728** | **96.1%** |
+| **Pytest Output** (50 tests) | 3.2 KB | 2,904 | 1,854 *(−36.2%)* | **235** | **91.9%** |
+| **CSV Analytics** (500 rows) | 27.1 KB | 24,524 | 14,924 *(−39.1%)* | **885** | **96.4%** |
+| **Python Code** (~30 functions) | 12.9 KB | 10,459 | 7,181 *(−31.3%)* | **325** | **96.9%** |
+| **Docker Build Log** (200 steps) | 11.5 KB | 9,996 | 6,456 *(−35.4%)* | **509** | **94.9%** |
+| **Embedding Vector** (768-dim float32) | 3.1 KB | 2,589 | 1,727 *(−33.3%)* | **175** | **93.2%** |
+| **Random Binary Blob** (incompressible) | 5.0 KB | 4,535 | **2,797** *(−38.3%)* | **2,854** | **37.1%** |
 
 ---
 
@@ -63,13 +40,31 @@ ByteToken mathematically guarantees **15 to 17 bits per token** by exploiting "n
 pip install bytetoken
 ```
 
-### Encode & Decode (3 Lines)
+### 1. MCP Tool Decorator (Auto-Compression on the Wire)
+
+```python
+import bytetoken
+from bytetoken.mcp import mcp_tool
+
+@mcp_tool(compress=True)
+def query_database(sql: str) -> dict:
+    """Returns database rows — automatically wire-encoded with 96% fewer tokens."""
+    return {"users": fetch_users_from_db(sql)}
+```
+
+### 2. Context Profiler (Diagnose Wasted Tokens in Agent Logs)
+
+```bash
+bytetoken profile agent_session.json
+```
+
+### 3. Direct Wire Encode & Decode (3 Lines)
 
 ```python
 import bytetoken
 
-encoded = bytetoken.encode(b"any binary data here")   # universal mode (works on ALL LLMs)
-decoded = bytetoken.decode(encoded)                    # lossless round-trip
+encoded = bytetoken.encode(b"any binary data here")   # 15-bit non-merging atoms
+decoded = bytetoken.decode(encoded)                    # 100% lossless round-trip
 assert decoded == b"any binary data here"
 ```
 

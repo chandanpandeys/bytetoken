@@ -178,7 +178,7 @@ def scan_tokenizer(tokenizer_name: str) -> dict:
 
     report["comparison_notes"] = {
         "cl100k_baseline": {"space_nonmerging": 48702, "directid_safe": 100069, "max_bw": 16},
-        "o200k_baseline": {"space_nonmerging": 56000, "directid_safe": 199470, "max_bw": 17},
+        "o200k_baseline": {"space_nonmerging": 105742, "directid_safe": 198424, "max_bw": 17},
     }
 
     return report

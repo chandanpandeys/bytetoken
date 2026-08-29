@@ -45,12 +45,17 @@ from bytetoken.core import (
     SentencePieceByteTokenEncoder,
     ErrorDetectingEncoder,
 )
+from bytetoken.profiler import ContextProfiler, profile_file
+from bytetoken.store import ArtifactStore
+from bytetoken.mcp import mcp_tool, decode_mcp_response
 
 __version__ = "1.0.0"
 __all__ = [
     "encode", "decode",
     "ByteTokenEncoder", "UniversalByteTokenEncoder", "DirectIDEncoder",
     "SentencePieceByteTokenEncoder", "ErrorDetectingEncoder",
+    "ContextProfiler", "profile_file", "ArtifactStore",
+    "mcp_tool", "decode_mcp_response",
     "native_encode", "native_decode", "backend_info", "ACTIVE_BACKEND",
 ]
 

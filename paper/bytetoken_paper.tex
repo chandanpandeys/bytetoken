@@ -27,18 +27,17 @@
 
 \author{
   Chandan Pandey \\
-  ByteToken Research Team \\
-  \texttt{github.com/bytetoken/ByteToken}
+  \texttt{https://github.com/chandanpandeys/bytetoken}
 }
 
-\date{March 2026}
+\date{August 2026}
 
 \begin{document}
 
 \maketitle
 
 \begin{abstract}
-We present the ByteToken Protocol, a novel method for encoding arbitrary binary data into LLM token sequences with provably optimal density. Our approach exploits a previously undocumented structural property of BPE tokenizers: the existence of \textit{non-merging atomic tokens} whose tokenization is invariant under concatenation. We identify three encoding modes achieving 15, 16, and 17 bits per token on OpenAI's \texttt{cl100k\_base} and \texttt{o200k\_base} tokenizers respectively, representing 44--51\% raw token savings over Base64. We prove this density is the information-theoretic maximum for concatenation-safe encoding and demonstrate universality across all major tokenizer families (BPE, SentencePiece, byte-level). Combined with adaptive compression, ByteToken achieves up to \textbf{93.6\% token reduction} on structured data. We release a complete open-source implementation featuring a zero-copy Rust/PyO3 backend that achieves a $300\times$ encoding speedup, alongside a multi-model bridge protocol supporting 11 architectures, and extensive empirical validation across 16 experiments producing 26 verified findings.
+We present the ByteToken Protocol, a novel method for encoding arbitrary binary data into LLM token sequences with provably optimal density. Our approach formalizes and exploits a structural property of BPE tokenizers: the existence of \textit{non-merging atomic tokens} whose tokenization is invariant under concatenation. We identify three encoding modes achieving 15, 16, and 17 bits per token on OpenAI's \texttt{cl100k\_base} and \texttt{o200k\_base} tokenizers respectively. ByteToken acts as a standalone encoder yielding 44--51\% raw token savings over Base64, and achieves up to \textbf{93.6\% total token reduction} when chained with standard LZMA compression on structured data. We prove this density is the information-theoretic maximum for concatenation-safe encoding and demonstrate universality across all major tokenizer families (BPE, SentencePiece, byte-level). We release a complete open-source implementation featuring a zero-copy Rust/PyO3 backend that achieves a $300\times$ encoding speedup, alongside a multi-model bridge protocol supporting 11 architectures, and extensive empirical validation across 16 experiments producing 26 verified findings.
 
 \vspace{0.5em}
 \noindent \textbf{Keywords:} BPE tokenization, binary encoding, LLM efficiency, token optimization, context window utilization
@@ -46,7 +45,9 @@ We present the ByteToken Protocol, a novel method for encoding arbitrary binary 
 
 \section{Introduction}
 
-Large Language Models (LLMs) process input as sequences of tokens, with costs directly proportional to token count. When binary data---images, compressed files, serialized objects---must pass through an LLM's context window, it is typically encoded as Base64, which expands data by 33\% before tokenization and fragments unpredictably under BPE, yielding approximately 5.6 bits per token \cite{openai2023tiktoken}. This inefficiency becomes a significant cost driver at scale.
+Large Language Models (LLMs) process input as sequences of tokens, with costs directly proportional to token count. The demand for transporting non-textual or densely structured data across LLM APIs has surged with the adoption of agentic architectures and tool-calling interfaces. Critical use cases require transmitting bytes identically through the context window, including: (1) Agents exchanging compiled binaries or WebAssembly (WASM) payloads for execution in sandboxed interpreters; (2) Losslessly passing massive serialized JSON/CSV state arrays between disconnected models; and (3) Transporting high-fidelity document embeddings or ciphertexts through third-party LLM middleware without semantic interference.
+
+When such data must pass through an LLM's context window, it is typically encoded as Base64. Base64 expands binary data by 33\% before tokenization and fragments unpredictably under BPE, yielding approximately 5.6 bits per token \cite{openai2023tiktoken}. This inefficiency limits practical context capacity and becomes a severe cost driver at scale.
 
 We introduce the \textbf{ByteToken Protocol}, which achieves 15--17 bits per token by constructing an encoding alphabet from tokens that are provably atomic under the BPE merge algorithm. Our key contributions are:
 
@@ -72,7 +73,10 @@ Byte Pair Encoding (BPE) \cite{sennrich2016neural} iteratively merges the most f
 
 \textbf{Meta BLT} \cite{godey2025byte} proposes byte-level transformers that bypass tokenization entirely.
 
-Our work differs fundamentally from all prior approaches by identifying and proving the non-merging atomic property, achieving the highest known bits-per-token ratio for any BPE-compatible encoding.
+\subsection{Prompt Compression and Semantic Methods}
+Recent work on context compression, such as LLMLingua \cite{jiang2023llmlingua} and In-Context Autoencoder (ICAE) \cite{ge2023icae}, reduces token constraints by discarding semantically redundant tokens or projecting context into continuous soft-prompt embeddings. These approaches are inherently lossy, computationally intensive (requiring local models to grade perplexity or access embedding layers), and optimized strictly for natural language. Similarly, generative steganography in LLMs \cite{zhang2023steganography} hides information within the statistical choice of generated semantic tokens.
+
+Our work differs fundamentally from all prior approaches. Rather than compressing semantic meaning or requiring architectural model changes, ByteToken guarantees the lossless transport of arbitrary binary structures through discrete API token boundaries by formalizing and exploiting the non-merging atomic property.
 
 \section{Non-Merging Atomic Tokens}
 
