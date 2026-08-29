@@ -172,17 +172,15 @@ def process_batch(payloads: list[bytes]):
         send_to_api(encoded)
 ```
 
-### 4. Context Window Multiplication
+### 4. Context Window Capacity
 
-Fit more data into fixed context windows (128K, 200K tokens).
+Potentially fit more encoded payload data into a fixed token budget when the payload must remain in model context.
 
 ```python
 import bytetoken
 
-# A 128K context window can carry:
-# - Base64: ~90KB of binary data
-# - ByteToken: ~240KB of binary data (2.7× more!)
-# - ByteToken + LZMA: ~2.4MB of JSON (27× more!)
+# Illustrative capacity estimate based on token density. Actual capacity depends on
+# tokenizer, protocol overhead, API limits, and the surrounding prompt.
 
 data = open("large_dataset.json", "rb").read()
 import lzma
@@ -252,7 +250,7 @@ send_to_gemini(encoded)
 
 ### 8. Error-Detecting Transport
 
-Add CRC-32 checksums to detect data corruption during LLM transport.
+Add CRC-32 checksums to detect corruption in the encoded payload. CRC detects accidental or model-induced changes; it does not correct them.
 
 ```python
 from bytetoken import ByteTokenEncoder, ErrorDetectingEncoder
@@ -487,7 +485,7 @@ bytetoken/
 
 ---
 
-## 🔬 Does the LLM "understand" the encoding?
+## 🔬 What ByteToken does (and does not do)
 
 **It doesn't have to.** ByteToken is an optimal **Transport Layer**.
 
@@ -496,6 +494,10 @@ You don't use ByteToken to ask the LLM "summarize this binary data in your head.
 Controlled copy-through experiments demonstrate lossless reproduction under the tested conditions. We have [mathematically proven and validated](examples/gemini_transport_validation.py) that LLMs like Google Gemini 2.5 Flash and GPT-4o will transport these tokens with **ZERO data loss**.
 
 ---
+
+## ⚠️ Status and scope
+
+ByteToken is experimental software. Results in this repository are benchmark- and tokenizer-specific. Claims about optimality, cross-model behavior, API support, production cost savings, and performance should be read together with the paper's assumptions and limitations.
 
 ## 🗺️ Roadmap
 
