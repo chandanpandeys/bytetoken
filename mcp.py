@@ -13,7 +13,7 @@ Usage:
 import functools
 import json
 import lzma
-from typing import Callable, Any, Dict
+from typing import Callable, Any, Dict, Union
 import bytetoken
 from bytetoken.store import ArtifactStore
 
@@ -53,25 +53,27 @@ def mcp_tool(compress: bool = True, threshold_bytes: int = 1024):
             # Apply ByteToken Wire Transport
             if compress:
                 compressed = lzma.compress(raw_bytes)
-                encoded = bytetoken.encode(compressed)
+                encoded = bytetoken.encode(compressed, mode="standard")
                 return {
                     "_bytetoken_wire": True,
                     "compressed": True,
-                    "encoding": "lzma+bytetoken-15",
-                    "original_bytes": len(raw_bytes),
-                    "wire_chars": len(encoded),
-                    "payload": encoded
-                }
-            else:
-                encoded = bytetoken.encode(raw_bytes)
-                return {
-                    "_bytetoken_wire": True,
-                    "compressed": False,
+                    "compression": "lzma",
                     "encoding": "bytetoken-15",
                     "original_bytes": len(raw_bytes),
+                    "compressed_bytes": len(compressed),
                     "wire_chars": len(encoded),
                     "payload": encoded
                 }
+            encoded = bytetoken.encode(raw_bytes, mode="standard")
+            return {
+                "_bytetoken_wire": True,
+                "compressed": False,
+                "compression": None,
+                "encoding": "bytetoken-15",
+                "original_bytes": len(raw_bytes),
+                "wire_chars": len(encoded),
+                "payload": encoded
+            }
 
         return wrapper
     return decorator
