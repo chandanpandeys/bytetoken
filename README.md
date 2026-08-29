@@ -310,7 +310,7 @@ ByteToken provides 5 encoding modes. Choose the right one for your use case:
 
 ## 🧠 Adaptive Encoding
 
-The adaptive encoder automatically selects the optimal strategy based on your data:
+The adaptive encoder uses entropy and compressibility heuristics to recommend an implemented strategy; it is not a proof of global optimality:
 
 ```python
 from bytetoken.adaptive import AdaptiveEncoder
@@ -318,9 +318,9 @@ from bytetoken.adaptive import AdaptiveEncoder
 enc = AdaptiveEncoder()
 
 # It automatically detects data characteristics and picks the best mode:
-# - High entropy (random binary) → 17-bit DirectID 
-# - Low entropy + compressible (JSON, text) → 15-bit + LZMA (87-92% savings!)
-# - Medium entropy → standard 15-bit
+# - High entropy (random binary) → highest available density mode
+# - Low entropy + compressible (JSON, text) → compression + ByteToken
+# - Medium entropy → standard mode
 
 encoded = enc.encode(my_data)   # auto-selects best mode
 decoded = enc.decode(encoded)   # lossless round-trip
@@ -487,11 +487,7 @@ bytetoken/
 
 ## 🔬 What ByteToken does (and does not do)
 
-**It doesn't have to.** ByteToken is an optimal **Transport Layer**.
-
-You don't use ByteToken to ask the LLM "summarize this binary data in your head." You use ByteToken to **ferry** massive payloads across the expensive API boundary into a Code Interpreter, an OpenAI Function Call, or an Anthropic Tool. 
-
-Controlled copy-through experiments demonstrate lossless reproduction under the tested conditions. We have [mathematically proven and validated](examples/gemini_transport_validation.py) that LLMs like Google Gemini 2.5 Flash and GPT-4o will transport these tokens with **ZERO data loss**.
+ByteToken is a **transport encoding**, not a way to make an LLM understand arbitrary binary data. It is useful when your architecture genuinely requires a payload to cross a tokenized model interface. Controlled copy-through experiments can test payload fidelity under specified conditions, but arbitrary model generation or reasoning should not be assumed to preserve an encoded payload byte-for-byte.
 
 ---
 
@@ -501,12 +497,12 @@ ByteToken is experimental software. Results in this repository are benchmark- an
 
 ## 🗺️ Roadmap
 
-- [x] v0.3.0 — Core protocol (OpenAI `cl100k_base` + `o200k_base`)
-- [x] v0.4.0 — SentencePiece, Error Detection, Fast Encoder, Adaptive, BLT Bridge
-- [x] 26 verified scientific findings
-- [x] Provably optimal encoding density (tight bound)
-- [x] 15/15 identified limitations addressed
-- [x] v1.0 — Native Rust encoder (300× speedup), PyPI release
+- [x] Core protocol for tested BPE tokenizers
+- [x] SentencePiece support, error detection, adaptive encoding, BLT bridge
+- [x] CLI, profiling and artifact-store experiments
+- [ ] Expand independent real-world benchmarks
+- [ ] Validate additional tokenizer/version combinations
+- [ ] Publish reproducible end-to-end agent transport benchmarks
 
 ---
 
