@@ -54,7 +54,7 @@ We introduce the \textbf{ByteToken Protocol}, which achieves 15--17 bits per tok
 \begin{itemize}
     \item \textbf{Discovery of non-merging atoms:} We identify and formally characterize a class of BPE tokens whose tokenization is invariant under arbitrary concatenation (\S 3).
     \item \textbf{Three encoding modes} spanning different density/portability tradeoffs (\S 4).
-    \item \textbf{Formal proofs} of optimality and the non-merging preservation theorem (\S 5).
+    \item \textbf{Formal analysis} of the encoding bound and non-merging preservation conditions (\S 5).
     \item \textbf{Compression pipeline optimization} achieving 93.6\% savings on structured data (\S 6).
     \item \textbf{Universality mapping} showing the non-merging property holds across all BPE tokenizer families.
 \end{itemize}
@@ -221,7 +221,7 @@ Emoji (0x1F600--0x1F64F) & 3.5--4.0 & \textbf{Danger zone} \\
 \caption{BPE Fragmentation Map: Tokens per Character. CJK and Emoji ranges are particularly expensive, costing 3--4 tokens per character and making them unsuitable for encoding alphabets.}
 \end{figure}
 
-This map is itself a novel contribution, providing practitioners with guidance on character selection for token-efficient applications.
+This visualization is an exploratory analysis of fragmentation behavior for the tested tokenizer configuration.
 
 \section{Experiments and Results}
 
