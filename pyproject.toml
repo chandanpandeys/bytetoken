@@ -64,14 +64,17 @@ Repository = "https://github.com/chandanpandeys/bytetoken"
 Issues = "https://github.com/chandanpandeys/bytetoken/issues"
 Paper = "https://github.com/chandanpandeys/bytetoken/blob/main/paper/bytetoken_paper.md"
 
-[tool.setuptools.packages.find]
-include = ["bytetoken*"]
-exclude = ["tests*", "scripts*", "paper*", "formal*"]
+[tool.setuptools]
+# The repository uses a flat package layout: the repository root itself
+# is the importable `bytetoken` package.
+packages = ["bytetoken"]
+package-dir = {"bytetoken" = "."}
+include-package-data = true
 
 [tool.setuptools.package-data]
-bytetoken = ["*.model", "atom_tables/*.json.gz"]
+bytetoken = ["*.model", "atom_tables/*.json.gz", "atom_tables/*.json"]
 
 [tool.pytest.ini_options]
-testpaths = ["bytetoken"]
+testpaths = ["."]
 python_files = ["tests.py"]
 python_functions = ["test_*"]
