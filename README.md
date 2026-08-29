@@ -493,7 +493,7 @@ bytetoken/
 
 You don't use ByteToken to ask the LLM "summarize this binary data in your head." You use ByteToken to **ferry** massive payloads across the expensive API boundary into a Code Interpreter, an OpenAI Function Call, or an Anthropic Tool. 
 
-The LLM ferries the tokens perfectly. We have [mathematically proven and validated](examples/gemini_transport_validation.py) that LLMs like Google Gemini 2.5 Flash and GPT-4o will transport these tokens with **ZERO data loss**.
+Controlled copy-through experiments demonstrate lossless reproduction under the tested conditions. We have [mathematically proven and validated](examples/gemini_transport_validation.py) that LLMs like Google Gemini 2.5 Flash and GPT-4o will transport these tokens with **ZERO data loss**.
 
 ---
 
