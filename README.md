@@ -146,7 +146,7 @@ import bytetoken
 
 # Agent A: encodes the payload
 image_bytes = capture_screenshot()
-encoded = bytetoken.encode(image_bytes, mode="universal")  # works across ANY LLM
+encoded = bytetoken.encode(image_bytes, mode="universal")  # designed for cross-tokenizer portability across the tested tokenizer families
 
 # Agent B (could be a different model): decodes it
 restored = bytetoken.decode(encoded, mode="universal")
