@@ -81,7 +81,7 @@ data = open("massive_dataset.json", "rb").read()     # 5MB
 compressed = lzma.compress(data)                      # shrink it first
 encoded = bytetoken.encode(compressed)                # then encode
 
-# Send `encoded` in your prompt — up to 97% fewer tokens!
+# Send `encoded` in your prompt — up to 97% fewer tokens! (Illustrative scenario — not a measured production saving.)
 ```
 
 ### Decode on the Other End
