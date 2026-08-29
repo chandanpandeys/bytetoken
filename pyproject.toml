@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "bytetoken"
 version = "1.0.0"
-description = "High-efficiency wire transport and context optimizer for AI agents and MCP servers. 15-17 bits/token vs Base64's 5.6."
+description = "Experimental tokenizer-aware binary encoding and context optimization toolkit for AI-agent workflows."
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.8"
@@ -18,7 +18,7 @@ keywords = [
     "openai", "anthropic", "gemini"
 ]
 classifiers = [
-    "Development Status :: 5 - Production/Stable",
+    "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
