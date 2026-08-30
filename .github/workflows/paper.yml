@@ -1,0 +1,42 @@
+name: Paper
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "paper/**"
+      - ".github/workflows/paper.yml"
+  push:
+    branches: [main]
+    paths:
+      - "paper/**"
+      - ".github/workflows/paper.yml"
+
+jobs:
+  build-paper:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install LaTeX
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            texlive-latex-base \
+            texlive-latex-recommended \
+            texlive-fonts-recommended
+
+      - name: Compile paper
+        working-directory: paper
+        run: |
+          pdflatex -interaction=nonstopmode -halt-on-error bytetoken_paper.tex
+          bibtex bytetoken_paper
+          pdflatex -interaction=nonstopmode -halt-on-error bytetoken_paper.tex
+          pdflatex -interaction=nonstopmode -halt-on-error bytetoken_paper.tex
+
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bytetoken-paper
+          path: paper/bytetoken_paper.pdf
+          if-no-files-found: error
