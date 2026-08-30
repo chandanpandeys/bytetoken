@@ -1,14 +1,10 @@
-<div align="center">
-  <img src="assets/banner.png" alt="ByteToken" width="800">
-  <br>
-  <p><b>Experimental tokenizer-aware binary transport for tokenized LLM interfaces.</b></p>
-
-  [![CI](https://github.com/chandanpandeys/bytetoken/actions/workflows/ci.yml/badge.svg)](https://github.com/chandanpandeys/bytetoken/actions/workflows/ci.yml)
-  [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
-  [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-</div>
-
 # ByteToken
+
+[![CI](https://github.com/chandanpandeys/bytetoken/actions/workflows/ci.yml/badge.svg)](https://github.com/chandanpandeys/bytetoken/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
+**Experimental tokenizer-aware binary transport for tokenized LLM interfaces.**
 
 ByteToken explores a narrow systems question:
 
@@ -27,7 +23,7 @@ The current implementation and paper focus primarily on OpenAI `tiktoken` encodi
 | Mode | Representation | Current scope | Notes |
 |---|---|---|---|
 | Standard | tokenizer-stable text | `cl100k_base`, `o200k_base` | Fixed-width encoding using space-prefixed candidate atoms; 15-bit is the conservative default. |
-| Universal | shared tokenizer-stable text | intersection of tested `cl100k_base` and `o200k_base` atoms | Intended for portability **between the tested tiktoken encodings**, not "all LLMs". |
+| Universal | shared tokenizer-stable text | intersection of tested `cl100k_base` and `o200k_base` atoms | Intended for portability **between the tested tiktoken encodings**, not "all LLMs". The public high-level default uses 13 bits. |
 | Direct ID | `list[int]` token IDs | local/compatible token-ID interfaces | Can reach 16–17 bits per token in the tested vocabularies. Current hosted text APIs should not be assumed to accept arbitrary pre-tokenized ID arrays. |
 | SentencePiece | text | included test SentencePiece model | Experimental compatibility path; not a claim covering every SentencePiece model. |
 | Error detecting | wrapper | any supported inner encoder | Adds CRC-32 corruption detection. CRC detects errors; it does not correct them. |
@@ -47,7 +43,7 @@ python -m pip install -e ".[all,dev]"
 Run the tests:
 
 ```bash
-python -m pytest tests.py -v
+python -m pytest tests.py tests_publication.py -v
 ```
 
 ## Quick start
@@ -75,7 +71,7 @@ restored = encoder.decode(token_ids)
 assert restored == b"binary data"
 ```
 
-`token_ids` are a local token-ID representation. Whether they can be supplied directly to a model depends on the inference interface. For example, the current OpenAI Responses API documents text, image, file, and structured input items rather than a generic arbitrary token-ID-array prompt input.
+`token_ids` are a local token-ID representation. Whether they can be supplied directly to a model depends on the inference interface. A hosted text/content API should not be assumed to accept arbitrary pre-tokenized IDs unless its documentation explicitly says so.
 
 ## Benchmarking
 
@@ -85,13 +81,14 @@ The repository includes:
 python benchmarks/benchmark_realworld.py
 ```
 
-Despite the historical filename, the benchmark generates **synthetic developer-like payloads** (JSON, pytest-style output, CSV, source code, logs, an embedding vector, and random bytes). It reports:
+Despite the historical filename, the benchmark generates **deterministic synthetic developer-like payloads** (JSON, pytest-style output, CSV, source code, logs, an embedding vector, and a deterministic random-byte control). The encoder and token counter now use the same declared `o200k_base` tokenizer. It reports:
 
 - Base64 token counts;
 - ByteToken-15 token counts;
+- Direct-ID-17 local representation counts;
 - LZMA + Base64;
-- LZMA + ByteToken-15;
-- LZMA + DirectID-17.
+- LZMA + ByteToken-15; and
+- LZMA + Direct-ID-17 local representation counts.
 
 This distinction matters: on structured data, conventional compression can account for most of the total reduction. ByteToken should be evaluated as the **binary-to-token representation layer**, while LZMA/zstd/Brotli/etc. should be evaluated as separate compression layers.
 
@@ -99,15 +96,11 @@ For publishable comparisons, use the same source bytes and target tokenizer for 
 
 ## Scope of the theoretical claim
 
-For a fixed set of independently decodable, concatenation-safe symbols \(A\), a fixed-width code can carry at most
+For a fixed set of independently decodable, concatenation-safe symbols `A`, a fixed-width code can carry at most
 
-\[
-\left\lfloor \log_2 |A| \right\rfloor
-\]
+`floor(log2(|A|))`
 
-bits per emitted symbol.
-
-ByteToken reaches that elementary bound by selecting \(2^b\) validated symbols and mapping each \(b\)-bit chunk to one symbol.
+bits per emitted symbol. ByteToken reaches that elementary bound by selecting `2^b` validated symbols and mapping each `b`-bit chunk to one symbol.
 
 This is **not** a proof that ByteToken is globally optimal among every conceivable tokenizer-aware encoding. Variable-length codes, stateful encodings, delimiters, multi-token codewords, or model-/API-specific mechanisms are outside that model.
 
@@ -133,12 +126,14 @@ bytetoken/
 ├── adaptive.py                # experimental compression/mode selection
 ├── profiler.py                # context/payload diagnostics
 ├── store.py                   # in-memory artifact-store prototype
-├── mcp.py                     # experimental MCP wrapper
-├── benchmarks/                # reproducible benchmark scripts
+├── mcp.py                     # experimental MCP-oriented wire wrapper
+├── benchmarks/                # controlled benchmark scripts
+├── examples/                  # deterministic local demonstration
 ├── formal/                    # formal specification work (partial)
 ├── paper/                     # canonical manuscript sources
 ├── rust_core/                 # experimental native backend
-└── tests.py                   # Python test suite
+├── tests.py                   # core Python test suite
+└── tests_publication.py       # public-surface regression tests
 ```
 
 The Lean material in `formal/` is a **formal specification/proof work in progress**. It should not be described as a complete machine-checked proof of concrete tokenizer behavior while placeholders or axiomatized tokenizer assumptions remain.

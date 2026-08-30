@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "bytetoken"
 version = "1.0.0"
-description = "Experimental tokenizer-aware binary encoding and context optimization toolkit for AI-agent workflows."
+description = "Experimental tokenizer-aware binary transport for tokenized LLM interfaces."
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.10"
@@ -14,8 +14,7 @@ authors = [
 ]
 keywords = [
     "llm", "tokenizer", "bpe", "encoding", "binary",
-    "mcp", "model-context-protocol", "agent-context", "token-optimization", "base64",
-    "openai", "anthropic", "gemini"
+    "token-optimization", "base64", "tiktoken"
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -29,7 +28,6 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: Software Development :: Libraries :: Python Modules",
-    "Topic :: System :: Networking",
 ]
 
 dependencies = [
@@ -74,5 +72,5 @@ bytetoken = ["*.model", "atom_tables/*.json.gz", "atom_tables/*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["."]
-python_files = ["tests.py"]
+python_files = ["tests.py", "tests_publication.py"]
 python_functions = ["test_*"]
