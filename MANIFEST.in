@@ -5,9 +5,10 @@ include __init__.py
 include __main__.py
 include *.py
 include *.c
+exclude tests.py
+exclude tests_publication.py
 recursive-include atom_tables *.json.gz *.json
 recursive-include rust_core Cargo.toml Cargo.lock src/*.rs
 recursive-include js *
-recursive-exclude bytetoken/rust_core/target *
-recursive-exclude tests *
-recursive-exclude paper *.aux *.log *.out
+recursive-exclude rust_core/target *
+recursive-exclude paper *.aux *.bbl *.blg *.log *.out *.pdf
