@@ -45,6 +45,19 @@ coverage.xml
 rust_core/target/
 **/*.rs.bk
 
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+
 # Jupyter Notebook
 .ipynb_checkpoints
 

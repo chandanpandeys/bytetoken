@@ -2,7 +2,7 @@
 name = "bytetoken-native"
 version = "0.1.0"
 edition = "2021"
-description = "Native Rust core for ByteToken Protocol — 300x faster encode/decode"
+description = "Experimental native Rust bit-packing backend for ByteToken"
 
 [lib]
 name = "bytetoken_native"

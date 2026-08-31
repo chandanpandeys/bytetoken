@@ -1,211 +1,105 @@
-  @misc{openai2023tiktoken,
-  title={tiktoken: BPE tokeniser for use with OpenAI's models},
-  author={OpenAI},
-  year={2023},
-  publisher={GitHub},
-  howpublished={\url{https://github.com/openai/tiktoken}}
+@misc{openai_tiktoken,
+  author       = {{OpenAI}},
+  title        = {tiktoken: a fast {BPE} tokenizer for use with {OpenAI}'s models},
+  year         = {2023},
+  howpublished = {\url{https://github.com/openai/tiktoken}},
+  note         = {Accessed 2026-08-30}
 }
 
-@inproceedings{sennrich2016neural,
-  title={Neural Machine Translation of Rare Words with Subword Units},
-  author={Sennrich, Rico and Haddow, Barry and Birch, Alexandra},
-  booktitle={Proceedings of the 54th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)},
-  pages={1715--1725},
-  year={2016}
+@inproceedings{sennrich2016bpe,
+  author    = {Sennrich, Rico and Haddow, Barry and Birch, Alexandra},
+  title     = {Neural Machine Translation of Rare Words with Subword Units},
+  booktitle = {Proceedings of the 54th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)},
+  pages     = {1715--1725},
+  year      = {2016},
+  publisher = {Association for Computational Linguistics},
+  doi       = {10.18653/v1/P16-1162},
+  url       = {https://aclanthology.org/P16-1162/}
 }
 
-@techreport{josefsson2006base16,
-  title={The Base16, Base32, and Base64 Data Encodings},
-  author={Josefsson, Simon},
-  year={2006},
-  institution={IETF RFC 4648},
-  url={https://doi.org/10.17487/RFC4648}
+@techreport{rfc4648,
+  author      = {Josefsson, Simon},
+  title       = {The Base16, Base32, and Base64 Data Encodings},
+  institution = {Internet Engineering Task Force},
+  number      = {RFC 4648},
+  year        = {2006},
+  doi         = {10.17487/RFC4648},
+  url         = {https://www.rfc-editor.org/rfc/rfc4648}
 }
 
-@misc{nicol2020base32768,
-  title={base32768: Binary encoding optimised for UTF-16 strings},
-  author={Nicol, David},
-  year={2020},
-  publisher={npm package},
-  howpublished={\url{https://github.com/qntm/base32768}}
-}
-
-@misc{slim2024,
-  title={Structured LLM Input Minimization (SLIM)},
-  author={{SLIM Protocol}},
-  year={2024},
-  publisher={GitHub}
-}
-
-@article{bommarito2025binary,
-  title={Binary BPE: Efficient Binary Data Encoding for Language Models},
-  author={Bommarito, Michael},
-  journal={arXiv preprint arXiv:2501.00000},
-  year={2025}
-}
-
-@techreport{meta2025kolmogorov,
-  title={KoLMogorov Test: Compressibility as Intelligence},
-  author={{Meta AI}},
-  year={2025},
-  institution={Meta Research}
-}
-
-@inproceedings{godey2025byte,
-  title={Byte Latent Transformer: Patches Scale Better Than Tokens},
-  author={Godey, N. and others},
-  booktitle={Proceedings of the 42nd International Conference on Machine Learning (ICML)},
-  year={2025}
-}
-
-@techreport{radford2019language,
-  title={Language Models are Unsupervised Multitask Learners},
-  author={Radford, Alec and Wu, Jeffrey and Child, Rewon and Luan, David and Amodei, Dario and Sutskever, Ilya},
-  year={2019},
-  institution={OpenAI}
+@misc{base32768,
+  author       = {Nicol, David},
+  title        = {base32768: Binary-to-text encoding highly optimised for UTF-16},
+  howpublished = {\url{https://github.com/qntm/base32768}},
+  note         = {Accessed 2026-08-30}
 }
 
 @inproceedings{kudo2018sentencepiece,
-  title={SentencePiece: A simple and language independent subword tokenizer and detokenizer for Neural Text Processing},
-  author={Kudo, Taku and Richardson, John},
-  booktitle={Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing},
-  pages={66--71},
-  year={2018}
+  author    = {Kudo, Taku and Richardson, John},
+  title     = {SentencePiece: A simple and language independent subword tokenizer and detokenizer for Neural Text Processing},
+  booktitle = {Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing: System Demonstrations},
+  pages     = {66--71},
+  year      = {2018},
+  publisher = {Association for Computational Linguistics},
+  doi       = {10.18653/v1/D18-2012},
+  url       = {https://aclanthology.org/D18-2012/}
 }
 
-@article{gage1994new,
-  title={A New Algorithm for Data Compression},
-  author={Gage, Philip},
-  journal={The C Users Journal},
-  volume={12},
-  number={2},
-  pages={23--38},
-  year={1994}
-}
-
-@techreport{eastlake1996base85,
-  title={A Compact Representation of IPv6 Addresses},
-  author={Eastlake, Donald and Manros, Carl-Uno},
-  year={1996},
-  institution={IETF RFC 1924 (Base85)}
-}
-
-@inproceedings{provilkov2020bpe,
-  title={BPE-Dropout: Simple and Effective Subword Regularization},
-  author={Provilkov, Ivan and Emelianenko, Dmitrii and Voita, Elena},
-  booktitle={Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics},
-  pages={1882--1892},
-  year={2020}
+@inproceedings{provilkov2020bpedropout,
+  author    = {Provilkov, Ivan and Emelianenko, Dmitrii and Voita, Elena},
+  title     = {{BPE}-Dropout: Simple and Effective Subword Regularization},
+  booktitle = {Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics},
+  pages     = {1882--1892},
+  year      = {2020},
+  publisher = {Association for Computational Linguistics},
+  doi       = {10.18653/v1/2020.acl-main.170},
+  url       = {https://aclanthology.org/2020.acl-main.170/}
 }
 
 @article{xue2022byt5,
-  title={ByT5: Towards a Token-Free Future with Pre-trained Byte-to-Byte Models},
-  author={Xue, Linting and Barua, Aditya and Constant, Noah and Al-Rfou, Rami and Narang, Sharan and Kale, Mihir and Roberts, Adam and Raffel, Colin},
-  journal={Transactions of the Association for Computational Linguistics},
-  volume={10},
-  pages={291--306},
-  year={2022}
+  author  = {Xue, Linting and Barua, Aditya and Constant, Noah and Al-Rfou, Rami and Narang, Sharan and Kale, Mihir and Roberts, Adam and Raffel, Colin},
+  title   = {{ByT5}: Towards a Token-Free Future with Pre-trained Byte-to-Byte Models},
+  journal = {Transactions of the Association for Computational Linguistics},
+  volume  = {10},
+  pages   = {291--306},
+  year    = {2022},
+  doi     = {10.1162/tacl_a_00461},
+  url     = {https://aclanthology.org/2022.tacl-1.17/}
 }
 
-@inproceedings{wang2020neural,
-  title={Neural Machine Translation with Byte-Level Subwords},
-  author={Wang, Changhan and Cho, Kyunghyun and Gu, Jiatao},
-  booktitle={Proceedings of the AAAI Conference on Artificial Intelligence},
-  volume={34},
-  number={05},
-  pages={9154--9160},
-  year={2020}
-}
-
-@article{lester2024training,
-  title={Training and Inference Efficiency of Tokenizer Choice},
-  author={Lester, Brian and Yogatama, Dani and Fiedel, Noah and Zelle, John},
-  journal={arXiv preprint arXiv:2402.00000},
-  year={2024}
-}
-
-@inproceedings{brown2020language,
-  title={Language Models are Few-Shot Learners},
-  author={Brown, Tom and others},
-  booktitle={Advances in Neural Information Processing Systems},
-  volume={33},
-  pages={1877--1901},
-  year={2020}
-}
-
-@misc{anthropic2024claude,
-  title={Claude Tokenization},
-  author={Anthropic},
-  year={2024},
-  publisher={Anthropic API Documentation},
-  howpublished={\url{https://docs.anthropic.com}}
-}
-
-@techreport{google2025gemini,
-  title={Gemini 2.5 Technical Report},
-  author={{Google DeepMind}},
-  year={2025},
-  institution={Google Research}
-}
-
-@inproceedings{devlin2019bert,
-  title={BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding},
-  author={Devlin, Jacob and Chang, Ming-Wei and Lee, Kenton and Toutanova, Kristina},
-  booktitle={Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 1 (Long and Short Papers)},
-  pages={4171--4186},
-  year={2019}
-}
-
-@article{ziv1977universal,
-  title={A Universal Algorithm for Sequential Data Compression},
-  author={Ziv, Jacob and Lempel, Abraham},
-  journal={IEEE Transactions on information theory},
-  volume={23},
-  number={3},
-  pages={337--343},
-  year={1977}
-}
-
-@misc{pavlov2001lzma,
-  title={LZMA SDK (Software Development Kit)},
-  author={Pavlov, Igor},
-  year={2001},
-  howpublished={\url{https://7-zip.org/sdk.html}}
-}
-
-@article{chen2025agbpe,
-  title={Attention-Guided BPE: Semantically-Aware Subword Tokenization},
-  author={Chen, L. and others},
-  year={2025},
-  note={Hugging Face Research, August 2025}
-}
-
-@misc{openai2025gpt5,
-  title={GPT-5 Model Card: Reasoning Tokens and Billing},
-  author={OpenAI},
-  year={2025},
-  howpublished={OpenAI Documentation, August 2025}
+@inproceedings{pagnoni2025blt,
+  author    = {Pagnoni, Artidoro and Pasunuru, Ramakanth and Rodriguez, Pedro and Nguyen, John and Muller, Benjamin and Li, Margaret and Zhou, Chunting and Yu, Lili and Weston, Jason E. and Zettlemoyer, Luke and Ghosh, Gargi and Lewis, Mike and Holtzman, Ari and Iyer, Srini},
+  title     = {Byte Latent Transformer: Patches Scale Better Than Tokens},
+  booktitle = {Proceedings of the 63rd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)},
+  pages     = {9238--9258},
+  year      = {2025},
+  publisher = {Association for Computational Linguistics},
+  doi       = {10.18653/v1/2025.acl-long.453},
+  url       = {https://aclanthology.org/2025.acl-long.453/}
 }
 
 @inproceedings{jiang2023llmlingua,
-  title={LLMLingua: Compressing Prompts for Accelerated Inference of Large Language Models},
-  author={Jiang, Huiqiang and Wu, Qianhui and Lin, Chin-Yew and Yang, Yuqing and Qiu, Lili},
-  booktitle={Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing},
-  pages={13358--13376},
-  year={2023}
+  author    = {Jiang, Huiqiang and Wu, Qianhui and Lin, Chin-Yew and Yang, Yuqing and Qiu, Lili},
+  title     = {{LLML}ingua: Compressing Prompts for Accelerated Inference of Large Language Models},
+  booktitle = {Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing},
+  pages     = {13358--13376},
+  year      = {2023},
+  publisher = {Association for Computational Linguistics},
+  doi       = {10.18653/v1/2023.emnlp-main.825},
+  url       = {https://aclanthology.org/2023.emnlp-main.825/}
 }
 
 @article{ge2023icae,
-  title={In-context Autoencoder for Context Compression in a Large Language Model},
-  author={Ge, Tao and Hu, Jing and Wang, Xun and Chen, Si-Qing and Wei, Furu},
-  journal={arXiv preprint arXiv:2307.06945},
-  year={2023}
+  author  = {Ge, Tao and Hu, Jing and Wang, Xun and Chen, Si-Qing and Wei, Furu},
+  title   = {In-context Autoencoder for Context Compression in a Large Language Model},
+  journal = {arXiv preprint arXiv:2307.06945},
+  year    = {2023},
+  url     = {https://arxiv.org/abs/2307.06945}
 }
 
-@article{zhang2023steganography,
-  title={Provably Secure Generative Steganography in Practice},
-  author={Zhang, Yu and others},
-  journal={arXiv preprint arXiv:2309.00000},
-  year={2023}
+@misc{pavlov_lzma,
+  author       = {Pavlov, Igor},
+  title        = {{LZMA} SDK},
+  howpublished = {\url{https://www.7-zip.org/sdk.html}},
+  note         = {Accessed 2026-08-30}
 }
-

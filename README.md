@@ -1,532 +1,190 @@
-<div align="center">
-  <img src="assets/banner.png" alt="ByteToken Logo" width="800">
-  <br>
-  <p><b>High-Efficiency Wire Transport & Context Optimizer for AI Agents and MCP Servers.</b></p>
+# ByteToken
 
-  
-  [![GitHub Repo](https://img.shields.io/badge/github-chandanpandeys%2Fbytetoken-blue)](https://github.com/chandanpandeys/bytetoken)
-  [![CI](https://github.com/chandanpandeys/bytetoken/actions/workflows/ci.yml/badge.svg)](https://github.com/chandanpandeys/bytetoken/actions/workflows/ci.yml)
-  [![Python](https://img.shields.io/badge/python-3.8+-blue)]()
-  [![License](https://img.shields.io/badge/license-MIT-green)]()
-</div>
+[![CI](https://github.com/chandanpandeys/bytetoken/actions/workflows/ci.yml/badge.svg)](https://github.com/chandanpandeys/bytetoken/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
----
+**Experimental tokenizer-aware binary transport for tokenized LLM interfaces.**
 
-**ByteToken** is a high-performance wire transport protocol and context optimization toolkit for AI agents. By exploiting **105,742 non-merging atomic tokens** in modern BPE tokenizers (`o200k_base`), ByteToken achieves **15 to 17 bits per token** with zero string fragmentation—saving **35% to 48% tokens** on raw binary data and **91% to 96%** on structured JSON/logs when paired with LZMA compression.
+ByteToken explores a narrow systems question:
 
-If your AI agents exchange database snapshots, embeddings, AST diffs, or images over **Model Context Protocol (MCP)** or remote API tool calls, ByteToken prevents Base64 token explosion and keeps your context clean.
+> If arbitrary bytes **must** cross a tokenizer-backed text or token interface, can a tokenizer-aware encoding use fewer tokens than conventional Base64?
 
----
+The project builds fixed-width binary encodings from tokenizer vocabulary items that are empirically validated for the required round-trip boundary conditions. It is a **transport encoding**, not a compression algorithm and not a way for an LLM to understand arbitrary binary data.
 
-## 📊 Measured Benchmark (o200k_base / GPT-4o Tokenizer)
+## Status
 
-*Tested on real-world developer payloads using live tokenizer encoding ([reproduce benchmark](benchmarks/benchmark_realworld.py)):*
+**Research prototype / alpha software.**
 
-| Payload Type | Raw Size | Base64 (Tokens) | ByteToken-15 (Tokens) | LZMA + ByteToken (Tokens) | Total Savings vs Base64 |
-|:---|:---:|:---:|:---:|:---:|:---:|
-| **JSON API Response** (100 records) | 21.4 KB | 18,574 | 11,919 *(−35.8%)* | **728** | **96.1%** |
-| **Pytest Output** (50 tests) | 3.2 KB | 2,904 | 1,854 *(−36.2%)* | **235** | **91.9%** |
-| **CSV Analytics** (500 rows) | 27.1 KB | 24,524 | 14,924 *(−39.1%)* | **885** | **96.4%** |
-| **Python Code** (~30 functions) | 12.9 KB | 10,459 | 7,181 *(−31.3%)* | **325** | **96.9%** |
-| **Docker Build Log** (200 steps) | 11.5 KB | 9,996 | 6,456 *(−35.4%)* | **509** | **94.9%** |
-| **Embedding Vector** (768-dim float32) | 3.1 KB | 2,589 | 1,727 *(−33.3%)* | **175** | **93.2%** |
-| **Random Binary Blob** (incompressible) | 5.0 KB | 4,535 | **2,797** *(−38.3%)* | **2,854** | **37.1%** |
+The current implementation and paper focus primarily on OpenAI `tiktoken` encodings (`cl100k_base` and `o200k_base`). Results are tokenizer- and version-specific. Cross-provider behavior, hosted-API support for pre-tokenized IDs, model copy-through fidelity, production cost savings, and accelerator speedups must be measured separately for each deployment.
 
----
+## What is implemented
 
-## ⚡ Quick Start
+| Mode | Representation | Current scope | Notes |
+|---|---|---|---|
+| Standard | tokenizer-stable text | `cl100k_base`, `o200k_base` | Fixed-width encoding using space-prefixed candidate atoms; 15-bit is the conservative default. |
+| Universal | shared tokenizer-stable text | intersection of tested `cl100k_base` and `o200k_base` atoms | Intended for portability **between the tested tiktoken encodings**, not "all LLMs". The public high-level default uses 13 bits. |
+| Direct ID | `list[int]` token IDs | local/compatible token-ID interfaces | Can reach 16–17 bits per token in the tested vocabularies. Current hosted text APIs should not be assumed to accept arbitrary pre-tokenized ID arrays. |
+| SentencePiece | text | included test SentencePiece model | Experimental compatibility path; not a claim covering every SentencePiece model. |
+| Error detecting | wrapper | any supported inner encoder | Adds CRC-32 corruption detection. CRC detects errors; it does not correct them. |
+
+The `DirectIDEncoder.encode_to_string()` helper serializes IDs as JSON for storage/debugging. That JSON representation is **not** the high-density Direct-ID transport representation.
+
+## Installation
+
+ByteToken is not currently presented here as a published PyPI release. Install from the repository:
 
 ```bash
 git clone https://github.com/chandanpandeys/bytetoken.git
 cd bytetoken
-pip install -e ".[all,dev]"
+python -m pip install -e ".[all,dev]"
 ```
 
-### 1. MCP Tool Decorator (Auto-Compression on the Wire)
-
-```python
-import bytetoken
-from bytetoken.mcp import mcp_tool
-
-@mcp_tool(compress=True)
-def query_database(sql: str) -> dict:
-    """Returns database rows — automatically wire-encoded with 96% fewer tokens."""
-    return {"users": fetch_users_from_db(sql)}
-```
-
-### 2. Context Profiler (Diagnose Wasted Tokens in Agent Logs)
+Run the tests:
 
 ```bash
-bytetoken profile agent_session.json
+python -m pytest tests.py tests_publication.py -v
 ```
 
-### 3. Direct Wire Encode & Decode (3 Lines)
+## Quick start
 
 ```python
 import bytetoken
 
-encoded = bytetoken.encode(b"any binary data here")   # 15-bit non-merging atoms
-decoded = bytetoken.decode(encoded)                    # 100% lossless round-trip
-assert decoded == b"any binary data here"
+payload = b"arbitrary binary data"
+
+encoded = bytetoken.encode(payload, mode="standard")
+decoded = bytetoken.decode(encoded, mode="standard")
+
+assert decoded == payload
 ```
 
-### With Compression (Maximum Savings)
+### Direct ID mode
 
 ```python
-import bytetoken
-import lzma
+from bytetoken import DirectIDEncoder
 
-data = open("massive_dataset.json", "rb").read()     # 5MB
+encoder = DirectIDEncoder(tokenizer="o200k_base")
+token_ids = encoder.encode(b"binary data")
+restored = encoder.decode(token_ids)
 
-compressed = lzma.compress(data)                      # shrink it first
-encoded = bytetoken.encode(compressed)                # then encode
-
-# Send `encoded` in your prompt — up to 97% fewer tokens! (Illustrative scenario — not a measured production saving.)
+assert restored == b"binary data"
 ```
 
-### Decode on the Other End
+`token_ids` are a local token-ID representation. Whether they can be supplied directly to a model depends on the inference interface. A hosted text/content API should not be assumed to accept arbitrary pre-tokenized IDs unless its documentation explicitly says so.
 
-```python
-import bytetoken
-import lzma
+## Benchmarking
 
-def my_tool(encoded_payload: str):
-    compressed = bytetoken.decode(encoded_payload)
-    original = lzma.decompress(compressed)
-    return process(original)  # perfectly restored!
-```
-
----
-
-## 🎯 Use Cases
-
-### 1. OpenAI Function Calling / Tool Use
-
-The most common use case: send binary data to an LLM tool function without blowing up your token budget.
-
-```python
-import bytetoken, json, lzma
-from openai import OpenAI
-
-client = OpenAI()
-
-# Your massive payload
-data = open("report.pdf", "rb").read()
-encoded = bytetoken.encode(lzma.compress(data))
-
-# Define the tool
-tools = [{
-    "type": "function",
-    "function": {
-        "name": "analyze_document",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "document_bytes": {"type": "string", "description": "ByteToken-encoded document"}
-            },
-            "required": ["document_bytes"]
-        }
-    }
-}]
-
-# Send — the LLM ferries the tokens perfectly
-response = client.chat.completions.create(
-    model="gpt-4o",
-    messages=[{"role": "user", "content": f"Analyze this document: {encoded}"}],
-    tools=tools
-)
-```
-
-### 2. Multi-Agent Binary Transport
-
-Pass binary data between agents in a multi-agent pipeline without losing fidelity.
-
-```python
-import bytetoken
-
-# Agent A: encodes the payload
-image_bytes = capture_screenshot()
-encoded = bytetoken.encode(image_bytes, mode="universal")  # designed for cross-tokenizer portability across the tested tokenizer families
-
-# Agent B (could be a different model): decodes it
-restored = bytetoken.decode(encoded, mode="universal")
-assert restored == image_bytes  # perfect!
-```
-
-### 3. Batch Cost Optimization
-
-Running thousands of API calls per day? ByteToken cuts your bill dramatically.
-
-```python
-import bytetoken
-
-# Before: 380K tokens per call × 10K calls/day × $75/1M = $285K/day
-# After:  25K tokens per call × 10K calls/day × $75/1M = $18.8K/day
-# Savings: $266K/day = $97M/year
-
-def process_batch(payloads: list[bytes]):
-    import lzma
-    for payload in payloads:
-        encoded = bytetoken.encode(lzma.compress(payload))
-        # Token count dropped ~93%
-        send_to_api(encoded)
-```
-
-### 4. Context Window Capacity
-
-Potentially fit more encoded payload data into a fixed token budget when the payload must remain in model context.
-
-```python
-import bytetoken
-
-# Illustrative capacity estimate based on token density. Actual capacity depends on
-# tokenizer, protocol overhead, API limits, and the surrounding prompt.
-
-data = open("large_dataset.json", "rb").read()
-import lzma
-encoded = bytetoken.encode(lzma.compress(data))
-print(f"Fits in {len(encoded)} chars — that's {len(data)/len(encoded):.0f}x context multiplication")
-```
-
-### 5. Embedding Files in Prompts
-
-Embed images, PDFs, CSVs, or any file directly in a prompt efficiently.
-
-```python
-import bytetoken
-
-# Encode an image
-with open("photo.jpg", "rb") as f:
-    encoded_image = bytetoken.encode(f.read(), mode="standard")
-
-# Use in a prompt
-prompt = f"""Here is the image data encoded with ByteToken:
-{encoded_image}
-
-Please pass this to the `process_image` tool for analysis."""
-```
-
-### 6. Streaming / Large File Chunking
-
-Process files larger than memory by chunking.
-
-```python
-import bytetoken
-from bytetoken import ByteTokenEncoder
-
-enc = ByteTokenEncoder(bit_width=15)
-
-def encode_chunked(filepath, chunk_size=1_000_000):
-    """Encode a large file in 1MB chunks."""
-    chunks = []
-    with open(filepath, "rb") as f:
-        while True:
-            chunk = f.read(chunk_size)
-            if not chunk:
-                break
-            chunks.append(enc.encode(chunk))
-    return chunks  # list of encoded strings
-```
-
-### 7. Cross-Model Compatibility
-
-Same encoded data works across GPT-4o, Claude, Gemini, Llama, and more.
-
-```python
-import bytetoken
-
-# Universal mode: works on ANY BPE tokenizer
-encoded = bytetoken.encode(data, mode="universal")
-
-# Send to OpenAI
-send_to_openai(encoded)
-
-# OR send to Anthropic — same encoded string!
-send_to_anthropic(encoded)
-
-# OR send to Google Gemini
-send_to_gemini(encoded)
-```
-
-### 8. Error-Detecting Transport
-
-Add CRC-32 checksums to detect corruption in the encoded payload. CRC detects accidental or model-induced changes; it does not correct them.
-
-```python
-from bytetoken import ByteTokenEncoder, ErrorDetectingEncoder
-
-base = ByteTokenEncoder(bit_width=15)
-enc = ErrorDetectingEncoder(base)
-
-encoded = enc.encode(b"critical data")  # adds CRC-32 header
-decoded = enc.decode(encoded)           # verifies checksum
-
-# If LLM corrupts even 1 token, decode raises IntegrityError
-```
-
----
-
-## 📊 Encoding Modes
-
-ByteToken provides 5 encoding modes. Choose the right one for your use case:
-
-| Mode | Bits/Token | Works With | Best For | Code |
-|:-----|:----------:|:-----------|:---------|:-----|
-| **Universal** | 13-14 | **All LLMs** (GPT, Claude, Gemini, Llama) | Multi-vendor, portability | `bytetoken.encode(data)` |
-| **Standard** | 15 | OpenAI (cl100k_base) | Maximum string density | `bytetoken.encode(data, mode="standard")` |
-| **Direct ID** | **17** | OpenAI (token arrays) | Ultra-high density | `bytetoken.encode(data, mode="direct_id")` |
-| **SentencePiece** | 8 | Llama, Mistral, T5 | Non-BPE models | `SentencePieceByteTokenEncoder()` |
-| **Adaptive** | Auto | OpenAI | Let the encoder decide | `AdaptiveEncoder().encode(data)` |
-
-### Which Mode Should I Use?
-
-```
-                   ┌─────────────────────────────┐
-                   │   What LLMs will you use?   │
-                   └──────────────┬──────────────┘
-                                  │
-                  ┌───────────────┼───────────────┐
-                  ▼               ▼               ▼
-           Multiple LLMs    OpenAI Only     Llama/Mistral
-                  │               │               │
-                  ▼               ▼               ▼
-           ┌──────────┐   ┌─────────────┐  ┌──────────────┐
-           │Universal │   │ Is data     │  │SentencePiece │
-           │  mode    │   │ type known? │  │    mode      │
-           └──────────┘   └──────┬──────┘  └──────────────┘
-                                 │
-                          ┌──────┼──────┐
-                          ▼             ▼
-                     Known type    Mixed/Unknown
-                          │             │
-                          ▼             ▼
-                   ┌────────────┐ ┌──────────┐
-                   │ Standard   │ │ Adaptive │
-                   │ or DirectID│ │   mode   │
-                   └────────────┘ └──────────┘
-```
-
----
-
-## 🧠 Adaptive Encoding
-
-The adaptive encoder uses entropy and compressibility heuristics to recommend an implemented strategy; it is not a proof of global optimality:
-
-```python
-from bytetoken.adaptive import AdaptiveEncoder
-
-enc = AdaptiveEncoder()
-
-# It automatically detects data characteristics and picks the best mode:
-# - High entropy (random binary) → highest available density mode
-# - Low entropy + compressible (JSON, text) → compression + ByteToken
-# - Medium entropy → standard mode
-
-encoded = enc.encode(my_data)   # auto-selects best mode
-decoded = enc.decode(encoded)   # lossless round-trip
-
-# Inspect the decision
-analysis = enc.analyze(my_data)
-print(analysis["recommended_mode"])   # e.g., "15bit_compressed"
-print(analysis["reason"])             # e.g., "Low entropy + compressible"
-```
-
-### Adaptive Savings by Data Type
-
-| Data Type | Entropy | Mode Selected | Token Savings |
-|:----------|:--------|:-------------|:--------------|
-| Random binary | 7.99 | 17-bit DirectID | 48% |
-| English text | 4.15 | 15-bit + LZMA | **87%** |
-| JSON data | 4.81 | 15-bit + LZMA | **82%** |
-| Repeated bytes | 1.00 | 15-bit + LZMA | **90%** |
-| Zero block | 0.00 | 15-bit + LZMA | **92%** |
-
----
-
-## 💻 Command-Line Interface
-
-ByteToken includes a full CLI for fast encoding/decoding from the terminal.
+The repository includes:
 
 ```bash
-# Encode a file
-python -m bytetoken encode report.pdf -o encoded.txt --bits 15
-
-# Decode it back
-python -m bytetoken decode encoded.txt -o restored.pdf
-
-# Benchmark encoding performance
-python -m bytetoken bench --size 100000
-
-# Show tokenizer info and atom counts
-python -m bytetoken info
+python benchmarks/benchmark_realworld.py
 ```
 
----
+Despite the historical filename, the benchmark generates **deterministic synthetic developer-like payloads** (JSON, pytest-style output, CSV, source code, logs, an embedding vector, and a deterministic random-byte control). The encoder and token counter now use the same declared `o200k_base` tokenizer. It reports:
 
-## 🔧 Advanced Features
+- Base64 token counts;
+- ByteToken-15 token counts;
+- Direct-ID-17 local representation counts;
+- LZMA + Base64;
+- LZMA + ByteToken-15; and
+- LZMA + Direct-ID-17 local representation counts.
 
-### BLT Bridge Protocol
+This distinction matters: on structured data, conventional compression can account for most of the total reduction. ByteToken should be evaluated as the **binary-to-token representation layer**, while LZMA/zstd/Brotli/etc. should be evaluated as separate compression layers.
 
-Automatically adapts encoding for 11+ model architectures (BPE, SentencePiece, byte-level, tokenizer-free):
+For publishable comparisons, use the same source bytes and target tokenizer for every method and report both token count and encode/decode latency.
 
-```python
-from bytetoken.blt_bridge import BLTBridge
+## Scope of the theoretical claim
 
-bridge = BLTBridge()
+For a fixed set of independently decodable, concatenation-safe symbols `A`, a fixed-width code can carry at most
 
-# Auto-selects optimal encoding per model
-payload = bridge.encode(data, model="gpt-4o")     # → DirectID 17-bit
-payload = bridge.encode(data, model="claude-3.5")  # → ByteToken 15-bit
-payload = bridge.encode(data, model="blt-llama")   # → Raw bytes (no encoding needed!)
+`floor(log2(|A|))`
 
-decoded = bridge.decode(payload)  # always lossless
+bits per emitted symbol. ByteToken reaches that elementary bound by selecting `2^b` validated symbols and mapping each `b`-bit chunk to one symbol.
 
-# List all supported models
-bridge.list_models()
-```
+This is **not** a proof that ByteToken is globally optimal among every conceivable tokenizer-aware encoding. Variable-length codes, stateful encodings, delimiters, multi-token codewords, or model-/API-specific mechanisms are outside that model.
 
-### Native Accelerators (~300× Speedup)
+## Important non-goals
 
-For maximum throughput, ByteToken ships with native CFFI, NumPy, and PyO3 Rust backends. The backend selector automatically chooses the fastest available compiler on your system without manual configuration. Our flagship **Rust backend** utilizes 120-bit vectorized unrolling and returns a zero-copy `NumPy` array to entirely bypass Python allocation overhead, achieving a true ~300× end-to-end speedup.
+ByteToken does **not**:
 
-```python
-from bytetoken.native_build import get_native_encoder
+- make an LLM reason directly over compressed or encoded bytes;
+- guarantee that a generative model will reproduce a long encoded sequence unchanged;
+- make arbitrary binaries safe to place in prompts;
+- replace object/artifact storage when a payload can be referenced instead of sent through model context;
+- provide error correction;
+- prove one alphabet works across every BPE, SentencePiece, WordPiece, or multimodal tokenizer;
+- make Direct-ID mode usable through an API that only accepts text/content items.
 
-# Auto-detects Rust PyO3 (Zero-Copy) > CFFI C > NumPy > Fast struct > Pure Python
-enc, dec = get_native_encoder()
-indices = enc(data, bit_width=15)
-restored = dec(indices, bit_width=15)
-```
+For many agent systems, an artifact store plus selective retrieval is cheaper than transporting the full payload at all. The cheapest token is the one that never enters model context.
 
-### Pre-Computed Atom Tables (Zero-Cost Init)
+## Repository layout
 
-Eliminate the atom discovery startup cost:
-
-```python
-from bytetoken.lazy_discovery import get_atoms, scan_and_save
-
-# First time: scan and save (takes ~5 seconds, saves to disk)
-scan_and_save("o200k_base")
-
-# Every subsequent time: load from disk (0ms, 3.44MB)
-atoms = get_atoms("o200k_base", bit_width=15)
-```
-
-### Tokenizer Compatibility Scanner
-
-Check new tokenizers for ByteToken compatibility:
-
-```python
-from bytetoken.gpt5_scanner import scan_tokenizer
-
-# Scan any tokenizer
-report = scan_tokenizer("o200k_base")
-print(f"Non-merging atoms: {report['space_nonmerging_count']}")
-print(f"Max bit-width: {report['space_optimal_bit_width']}")
-print(f"N-gram safety: {report['ngram_validation']}")
-```
-
----
-
-## 📖 API Reference
-
-### Simple API (`bytetoken`)
-
-| Function | Description |
-|:---------|:------------|
-| `bytetoken.encode(data, mode="universal")` | Encode bytes → string |
-| `bytetoken.decode(encoded, mode="universal")` | Decode string → bytes |
-
-### Encoder Classes (`bytetoken.core`)
-
-| Class | Usage |
-|:------|:------|
-| `ByteTokenEncoder(tokenizer, bit_width)` | Standard string encoder (15-bit) |
-| `UniversalByteTokenEncoder()` | Cross-tokenizer encoder (13-14 bit) |
-| `DirectIDEncoder(tokenizer, bit_width)` | Maximum density token IDs (17-bit) |
-| `SentencePieceByteTokenEncoder(model_path)` | For Llama/Mistral/T5 models |
-| `ErrorDetectingEncoder(inner_encoder)` | CRC-32 wrapper for any encoder |
-
-### Utility Modules
-
-| Module | Usage |
-|:-------|:------|
-| `bytetoken.adaptive.AdaptiveEncoder` | Auto-selects optimal encoding |
-| `bytetoken.blt_bridge.BLTBridge` | Multi-model bridge (11 models) |
-| `bytetoken.native_build.get_native_encoder` | ~300× faster encoding |
-| `bytetoken.lazy_discovery.get_atoms` | Pre-computed atom loading |
-| `bytetoken.gpt5_scanner.scan_tokenizer` | Tokenizer compatibility check |
-
----
-
-## 🏗 Architecture
-
-```
+```text
 bytetoken/
-├── __init__.py          # Simple API: encode() / decode()
-├── __main__.py          # CLI: python -m bytetoken
-├── core.py              # 5 encoder classes
-├── adaptive.py          # Auto-selects optimal encoding
-├── fast.py              # 3.3× faster encoder
-├── blt_bridge.py        # Multi-model bridge (11 models)
-├── lazy_discovery.py    # Pre-computed atom tables
-├── gpt5_scanner.py      # Tokenizer compatibility scanner
-├── theory.py            # Information-theoretic proofs
-├── dropout_analysis.py  # BPE-dropout robustness analysis
-├── examples/
-│   ├── function_calling_integration.py
-│   └── gemini_transport_validation.py
-├── formal/
-│   └── ByteToken.lean   # Lean4 formal verification
-├── rust_core/           # Native Rust encoder (300× speedup)
-├── atom_tables/         # Pre-computed atom ID tables
-└── paper/               # Research paper (26 findings)
+├── core.py                    # encoder implementations
+├── adaptive.py                # experimental compression/mode selection
+├── profiler.py                # context/payload diagnostics
+├── store.py                   # in-memory artifact-store prototype
+├── mcp.py                     # experimental MCP-oriented wire wrapper
+├── benchmarks/                # controlled benchmark scripts
+├── examples/                  # deterministic local demonstration
+├── formal/                    # formal specification work (partial)
+├── paper/                     # canonical manuscript sources
+├── rust_core/                 # experimental native backend
+├── tests.py                   # core Python test suite
+└── tests_publication.py       # public-surface regression tests
 ```
 
----
+The Lean material in `formal/` is a **formal specification/proof work in progress**. It should not be described as a complete machine-checked proof of concrete tokenizer behavior while placeholders or axiomatized tokenizer assumptions remain.
 
-## 🔬 What ByteToken does (and does not do)
+## Research paper
 
-ByteToken is a **transport encoding**, not a way to make an LLM understand arbitrary binary data. It is useful when your architecture genuinely requires a payload to cross a tokenized model interface. Controlled copy-through experiments can test payload fidelity under specified conditions, but arbitrary model generation or reasoning should not be assumed to preserve an encoded payload byte-for-byte.
+The publication-oriented manuscript is:
 
----
+- [Markdown paper](paper/bytetoken_paper.md)
+- [LaTeX source](paper/bytetoken_paper.tex)
+- [Bibliography](paper/references.bib)
 
-## ⚠️ Status and scope
+Generated LaTeX build products are intentionally not committed. The paper workflow compiles the LaTeX source and exposes the PDF as a CI artifact.
 
-ByteToken is experimental software. Results in this repository are benchmark- and tokenizer-specific. Claims about optimality, cross-model behavior, API support, production cost savings, and performance should be read together with the paper's assumptions and limitations.
+## Reproducibility checklist
 
-## 🗺️ Roadmap
+Before treating a result as evidence for a new tokenizer or deployment:
 
-- [x] Core protocol for tested BPE tokenizers
-- [x] SentencePiece support, error detection, adaptive encoding, BLT bridge
-- [x] CLI, profiling and artifact-store experiments
-- [ ] Expand independent real-world benchmarks
-- [ ] Validate additional tokenizer/version combinations
-- [ ] Publish reproducible end-to-end agent transport benchmarks
+1. pin the tokenizer/library version;
+2. record the exact alphabet construction rule;
+3. test full encode → transport representation → decode round-trips;
+4. compare against Base64 and compressed Base64 on identical bytes;
+5. report the target tokenizer used for counting;
+6. separate compression savings from encoding savings;
+7. report latency and environment;
+8. do not infer hosted-API compatibility from local token-ID experiments.
 
----
+## Security
 
-## 📄 The Research Paper
+Encoded data is still data. Applications should apply their normal authorization, size limits, malware/content handling, and decompression-bomb protections before decoding or processing untrusted payloads.
 
-ByteToken isn't just a hack; it's a formally verified protocol. We exhaustively scanned the 200,000+ token vocabularies of modern frontier models to find thousands of tokens that act as "BPE Word Boundaries."
+See [SECURITY.md](SECURITY.md).
 
-Read the [full academic paper here](paper/bytetoken_paper.md) for formal proofs, BPE fragmentation maps, and the 26 verified scientific findings.
+## Contributing
 
-If you use ByteToken in your research, please cite the protocol:
+Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) and open an issue before making large protocol or benchmark changes.
+
+## Citation
+
+If you build on the current research prototype, cite the repository and pin the commit or release you evaluated:
 
 ```bibtex
-@software{bytetoken2026,
-  title = {ByteToken Protocol: Non-Merging Atomic Tokens for Optimal Binary Data Transport Through LLM Context Windows},
-  author = {Chandan Pandey},
-  year = {2026},
-  url = {https://github.com/bytetoken/ByteToken},
-  version = {1.0.0}
+@software{pandey2026bytetoken,
+  author  = {Chandan Pandey},
+  title   = {ByteToken: Tokenizer-Aware Binary Transport for Tokenized LLM Interfaces},
+  year    = {2026},
+  url     = {https://github.com/chandanpandeys/bytetoken},
+  note    = {Research prototype; cite the evaluated commit or release}
 }
 ```
 
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guide](../CONTRIBUTING.md) for details on how to set up your environment, run tests, and submit Pull Requests. Be sure to review our [Code of Conduct](../CODE_OF_CONDUCT.md).
-
 ## License
+
 MIT

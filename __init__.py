@@ -1,41 +1,14 @@
-"""
-ByteToken Protocol
-==================
-Token-efficient binary encoding for LLM context windows.
-Achieves high token density on the tested tokenizer configurations.
-Optimality claims are scoped to the encoding model and tokenizer defined in the paper.
+"""ByteToken public API.
 
-Quick Start::
+ByteToken is an experimental tokenizer-aware binary transport encoding. The
+implementation provides deterministic local encode/decode primitives; it does
+not imply that a language model will understand or reproduce an encoded
+payload, and compatibility is specific to the tokenizer/interface being used.
 
-    import bytetoken
-
-    encoded = bytetoken.encode(b"binary data")        # universal mode
-    decoded = bytetoken.decode(encoded)                # lossless
-
-Modes::
-
-    encoded = bytetoken.encode(b"data", mode="universal")   # 13-bit, all LLMs
-    encoded = bytetoken.encode(b"data", mode="standard")    # 15-bit, OpenAI
-    encoded = bytetoken.encode(b"data", mode="direct_id")   # highest-density mode
-
-Advanced (class-based)::
-
-    from bytetoken import DirectIDEncoder
-    did = DirectIDEncoder()
-    ids = did.encode(b"data")  # -> List[int]
-
-    from bytetoken import ErrorDetectingEncoder
-    enc = ErrorDetectingEncoder(did)  # adds CRC-32 verification
-
-    from bytetoken.adaptive import AdaptiveEncoder
-    enc = AdaptiveEncoder()           # auto-selects optimal mode
-
-    from bytetoken.blt_bridge import BLTBridge
-    bridge = BLTBridge()              # multi-model bridge (11 architectures)
-
-    from bytetoken.native_build import native_encode, ACTIVE_BACKEND
-    fast = native_encode(b"data", bit_width=15)  # numpy-accelerated (11x faster)
-    print(ACTIVE_BACKEND)             # 'numpy', 'fast', or 'python'
+The high-level ``universal`` mode is deliberately conservative: it uses a
+13-bit alphabet shared by the tested ``cl100k_base`` and ``o200k_base``
+tiktoken encodings. The class name ``UniversalByteTokenEncoder`` is retained
+for API compatibility; it is not a claim of compatibility with every LLM.
 """
 
 from bytetoken.core import (
@@ -48,71 +21,52 @@ from bytetoken.core import (
 from bytetoken.profiler import ContextProfiler, profile_file
 from bytetoken.store import ArtifactStore
 from bytetoken.mcp import mcp_tool, decode_mcp_response
-
-__version__ = "1.0.0"
-__all__ = [
-    "encode", "decode",
-    "ByteTokenEncoder", "UniversalByteTokenEncoder", "DirectIDEncoder",
-    "SentencePieceByteTokenEncoder", "ErrorDetectingEncoder",
-    "ContextProfiler", "profile_file", "ArtifactStore",
-    "mcp_tool", "decode_mcp_response",
-    "native_encode", "native_decode", "backend_info", "ACTIVE_BACKEND",
-]
-
 from bytetoken.native_build import (
-    native_encode, native_decode, backend_info, ACTIVE_BACKEND
+    native_encode,
+    native_decode,
+    backend_info,
+    ACTIVE_BACKEND,
 )
 
-# Cache encoder instances (they're expensive to construct due to vocab scan)
+__version__ = "0.1.0"
+
+__all__ = [
+    "encode", "decode", "ByteTokenEncoder", "UniversalByteTokenEncoder",
+    "DirectIDEncoder", "SentencePieceByteTokenEncoder", "ErrorDetectingEncoder",
+    "ContextProfiler", "profile_file", "ArtifactStore", "mcp_tool",
+    "decode_mcp_response", "native_encode", "native_decode", "backend_info",
+    "ACTIVE_BACKEND",
+]
+
 _encoder_cache = {}
 
 
-def _get_encoder(mode: str, **kwargs):
-    """Get or create a cached encoder for the given mode."""
-    cache_key = mode
-    if cache_key not in _encoder_cache:
+def _get_encoder(mode: str):
+    if mode not in _encoder_cache:
         if mode == "universal":
-            _encoder_cache[cache_key] = UniversalByteTokenEncoder()
+            _encoder_cache[mode] = UniversalByteTokenEncoder(bit_width=13)
         elif mode == "standard":
-            _encoder_cache[cache_key] = ByteTokenEncoder()
+            _encoder_cache[mode] = ByteTokenEncoder(tokenizer="cl100k_base", bit_width=15)
         elif mode == "direct_id":
-            _encoder_cache[cache_key] = DirectIDEncoder()
+            _encoder_cache[mode] = DirectIDEncoder(tokenizer="o200k_base")
         else:
-            raise ValueError(
-                f"Unknown mode '{mode}'. Choose from: 'universal', 'standard', 'direct_id'"
-            )
-    return _encoder_cache[cache_key]
+            raise ValueError(f"Unknown mode {mode!r}. Choose 'universal', 'standard', or 'direct_id'.")
+    return _encoder_cache[mode]
 
 
 def encode(data: bytes, mode: str = "universal") -> str:
-    """Encode binary data into a ByteToken token string.
+    """Encode bytes using a supported high-level ByteToken mode.
 
-    Args:
-        data: Raw bytes to encode.
-        mode: Encoding mode — 'universal' (13-bit, all LLMs),
-              'standard' (15-bit, OpenAI), or 'direct_id' (17-bit, max density).
-
-    Returns:
-        Encoded string that can be sent through an LLM context window.
+    The high-level ``direct_id`` form is JSON text for compatibility with this
+    string-returning API. It is not the high-density Direct-ID representation.
+    Use ``DirectIDEncoder.encode`` for ``list[int]`` and only with an interface
+    that explicitly documents pre-tokenized input IDs.
     """
     enc = _get_encoder(mode)
-    if mode == "direct_id":
-        return enc.encode_to_string(data)
-    return enc.encode(data)
+    return enc.encode_to_string(data) if mode == "direct_id" else enc.encode(data)
 
 
 def decode(data: str, mode: str = "universal") -> bytes:
-    """Decode a ByteToken-encoded string back to raw bytes.
-
-    Args:
-        data: ByteToken-encoded string.
-        mode: Must match the mode used for encoding.
-
-    Returns:
-        Original binary data (lossless).
-    """
+    """Decode data produced by :func:`encode` using the same mode."""
     enc = _get_encoder(mode)
-    if mode == "direct_id":
-        return enc.decode_from_string(data)
-    return enc.decode(data)
-
+    return enc.decode_from_string(data) if mode == "direct_id" else enc.decode(data)
