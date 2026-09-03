@@ -30,8 +30,9 @@ dependencies = ["tiktoken>=0.5.0"]
 sentencepiece = ["sentencepiece>=0.1.99"]
 native = ["cffi>=1.0", "numpy>=1.20"]
 mcp = ["mcp>=1.0.0"]
-all = ["sentencepiece>=0.1.99", "cffi>=1.0", "numpy>=1.20"]
-dev = ["pytest>=7.0", "sentencepiece>=0.1.99", "cffi>=1.0", "numpy>=1.20"]
+playground = ["fastapi>=0.115", "uvicorn>=0.30"]
+all = ["sentencepiece>=0.1.99", "cffi>=1.0", "numpy>=1.20", "fastapi>=0.115", "uvicorn>=0.30"]
+dev = ["pytest>=7.0", "sentencepiece>=0.1.99", "cffi>=1.0", "numpy>=1.20", "fastapi>=0.115", "uvicorn>=0.30"]
 
 [project.scripts]
 bytetoken = "bytetoken.__main__:main"
@@ -44,12 +45,13 @@ Issues = "https://github.com/chandanpandeys/bytetoken/issues"
 Paper = "https://github.com/chandanpandeys/bytetoken/blob/main/paper/bytetoken_paper.md"
 
 [tool.setuptools]
-packages = ["bytetoken"]
-package-dir = {"bytetoken" = "."}
+packages = ["bytetoken", "bytetoken.playground"]
+package-dir = {"bytetoken" = ".", "bytetoken.playground" = "playground"}
 include-package-data = true
 
 [tool.setuptools.package-data]
 bytetoken = ["*.model", "atom_tables/*.json.gz", "atom_tables/*.json"]
+"bytetoken.playground" = ["static/*.html", "static/*.css", "static/*.js"]
 
 [tool.pytest.ini_options]
 testpaths = ["."]
