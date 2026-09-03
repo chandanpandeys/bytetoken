@@ -59,7 +59,7 @@ python_files = ["tests.py", "tests_publication.py"]
 python_functions = ["test_*"]
 
 [tool.vercel]
-entrypoint = "bytetoken.playground.app:app"
+entrypoint = "playground.app:app"
 
 [tool.vercel.fastapi.static]
 cdn = false
