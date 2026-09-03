@@ -32,18 +32,19 @@ function esc(value) { const d=document.createElement('div'); d.textContent=Strin
 function render(data) {
   const reps = data.representations;
   const textReps = reps.filter(r => r.kind !== 'local token-ID representation');
-  const best = [...reps].sort((a,b)=>a.tokens-b.tokens)[0];
+  const bestText = [...textReps].sort((a,b)=>a.tokens-b.tokens)[0];
+  const direct = reps.find(r => r.id === 'direct_id');
   summary.className = '';
   summary.innerHTML = `<div class="summary-grid">
     <div class="summary-cell"><strong>${fmt(data.input.bytes)}</strong><span>input bytes</span></div>
     <div class="summary-cell"><strong>${fmt(reps[0].tokens)}</strong><span>Base64 tokens</span></div>
-    <div class="summary-cell"><strong>${esc(best.label)}</strong><span>lowest measured count</span></div>
-    <div class="summary-cell"><strong>${fmt(best.savings_vs_base64_pct, '%')}</strong><span>vs Base64</span></div>
+    <div class="summary-cell"><strong>${esc(bestText.label)}</strong><span>best text transport</span></div>
+    <div class="summary-cell"><strong>${direct ? fmt(direct.tokens) : '—'}</strong><span>Direct-ID local IDs</span></div>
   </div>`;
-  cards.innerHTML = reps.map(r => `<article class="card ${r.id===best.id?'best':''}">
+  cards.innerHTML = reps.map(r => `<article class="card ${r.id===bestText.id?'best':''}">
     <div class="card-kicker">${esc(r.kind)}</div><h3>${esc(r.label)}</h3>
-    <div class="metric">${fmt(r.tokens)}</div><div class="metric-label">tokens</div>
-    <div class="saving ${r.savings_vs_base64_pct>0?'positive':''}">${r.savings_vs_base64_pct==null?'No baseline':`${r.savings_vs_base64_pct>0?'-':'+'}${Math.abs(r.savings_vs_base64_pct)}% tokens vs Base64`}</div>
+    <div class="metric">${fmt(r.tokens)}</div><div class="metric-label">${r.id === 'direct_id' ? 'local token IDs' : 'tokens'}</div>
+    <div class="saving ${r.savings_vs_base64_pct>0?'positive':''}">${r.savings_vs_base64_pct==null?'No baseline':`${r.savings_vs_base64_pct>0?'-':'+'}${Math.abs(r.savings_vs_base64_pct)}% count vs Base64 tokens`}</div>
     <div class="metric-label">encode ${fmt(r.encode_ms)} ms ${r.bit_width?` · ${r.bit_width}-bit`:''}</div>
     ${r.warning?`<p class="metric-label">${esc(r.warning)}</p>`:''}
     <div class="preview">${esc(Array.isArray(r.preview)?JSON.stringify(r.preview):r.preview)}</div>
