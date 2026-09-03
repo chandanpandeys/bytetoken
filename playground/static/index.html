@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ByteToken Playground</title>
+  <meta name="description" content="Measure ByteToken transport encodings against Base64 using real tokenizer counts and verified lossless round trips." />
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">ByteToken research prototype</p>
+        <h1>See what your bytes cost in tokens.</h1>
+        <p class="lede">Compare Base64, ByteToken Standard, shared-alphabet ByteToken, Direct ID, and LZMA-assisted transport on the exact same payload, then verify every path decodes back to the original bytes.</p>
+      </div>
+      <div class="hero-actions">
+        <a class="github-link" href="https://github.com/chandanpandeys/bytetoken" target="_blank" rel="noreferrer">GitHub ↗</a>
+        <a class="github-link" href="https://github.com/chandanpandeys/bytetoken/blob/main/paper/bytetoken_paper.md" target="_blank" rel="noreferrer">Paper ↗</a>
+        <a class="github-link" href="https://github.com/chandanpandeys/bytetoken/issues/new?template=playground-report.md" target="_blank" rel="noreferrer">Report a case ↗</a>
+      </div>
+    </header>
+
+    <section class="workspace">
+      <div class="panel input-panel">
+        <div class="panel-head">
+          <div>
+            <span class="step">01</span>
+            <h2>Payload</h2>
+          </div>
+          <span id="byteCount" class="counter">0 bytes</span>
+        </div>
+
+        <div class="control-row">
+          <label>Input
+            <select id="inputType">
+              <option value="text">UTF-8 text</option>
+              <option value="base64">Base64 bytes</option>
+            </select>
+          </label>
+          <label>Tokenizer
+            <select id="tokenizer">
+              <option value="o200k_base">o200k_base</option>
+              <option value="cl100k_base">cl100k_base</option>
+            </select>
+          </label>
+        </div>
+
+        <textarea id="payload" spellcheck="false" placeholder="Paste JSON, logs, source code, tool output, or any UTF-8 text…"></textarea>
+        <div class="examples">
+          <button data-example="json">JSON</button>
+          <button data-example="logs">Logs</button>
+          <button data-example="code">Code</button>
+          <button data-example="repeat">Compressible</button>
+        </div>
+        <button id="analyzeButton" class="primary">Analyze + verify transport</button>
+        <p id="error" class="error" role="alert"></p>
+      </div>
+
+      <div class="panel summary-panel">
+        <div class="panel-head">
+          <div><span class="step">02</span><h2>Measured result</h2></div>
+          <span id="status" class="status">Ready</span>
+        </div>
+        <div id="summary" class="empty-state">
+          <div class="pulse-dot"></div>
+          <p>Run an analysis to compare token counts and verify lossless encode → decode paths.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="results" class="results hidden">
+      <div class="section-heading">
+        <div><span class="step">03</span><h2>Transport comparison</h2></div>
+        <p>Lower token count is better. Direct ID is shown separately because it is not text transport. Every card includes a byte-for-byte round-trip check.</p>
+      </div>
+      <div id="cards" class="cards"></div>
+
+      <div class="compression-grid">
+        <article class="panel">
+          <div class="panel-head"><div><span class="step">04</span><h2>Compression layer</h2></div></div>
+          <div id="compression"></div>
+        </article>
+        <article class="panel">
+          <div class="panel-head"><div><span class="step">05</span><h2>Scope guardrails</h2></div></div>
+          <ul id="notes" class="notes"></ul>
+        </article>
+      </div>
+    </section>
+  </main>
+  <script src="/static/app.js" defer></script>
+</body>
+</html>
