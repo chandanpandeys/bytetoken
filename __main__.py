@@ -93,6 +93,14 @@ def cmd_profile(args):
             print(f"  - {recommendation}")
 
 
+def cmd_playground(args):
+    try:
+        from bytetoken.playground.app import run
+    except ImportError as exc:
+        raise SystemExit('Playground dependencies are missing. Install with: pip install -e ".[playground]"') from exc
+    run(host=args.host, port=args.port)
+
+
 def build_parser():
     parser = argparse.ArgumentParser(prog="bytetoken", description="Experimental tokenizer-aware binary transport toolkit")
     sub = parser.add_subparsers(dest="command")
@@ -100,13 +108,14 @@ def build_parser():
     p = sub.add_parser("decode", help="Decode a file"); p.add_argument("input"); p.add_argument("--output", "-o"); p.add_argument("--mode", choices=PUBLIC_MODES, default="universal")
     p = sub.add_parser("bench", help="Run a local synthetic benchmark"); p.add_argument("--size", type=int, default=10_000); p.add_argument("--tokenizer", default="cl100k_base")
     p = sub.add_parser("profile", help="Profile a conversation JSON file"); p.add_argument("session_file"); p.add_argument("--model", default="o200k_base")
+    p = sub.add_parser("playground", help="Launch the optional local ByteToken Playground"); p.add_argument("--host", default="127.0.0.1"); p.add_argument("--port", type=int, default=8000)
     sub.add_parser("info", help="Show tested tokenizer configuration info")
     return parser
 
 
 def main():
     parser = build_parser(); args = parser.parse_args()
-    handlers = {"encode": cmd_encode, "decode": cmd_decode, "bench": cmd_bench, "profile": cmd_profile, "info": cmd_info}
+    handlers = {"encode": cmd_encode, "decode": cmd_decode, "bench": cmd_bench, "profile": cmd_profile, "playground": cmd_playground, "info": cmd_info}
     if args.command in handlers: handlers[args.command](args)
     else: parser.print_help()
 
