@@ -41,6 +41,12 @@ The deployment entrypoint is:
 bytetoken.playground.app:app
 ```
 
+One-click import after the Playground changes are on `main`:
+
+```text
+https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fchandanpandeys%2Fbytetoken&repository-name=bytetoken-playground
+```
+
 The application itself has no database or persistent user state. Do not paste secrets or private payloads into a public deployment.
 
 ## Feedback
