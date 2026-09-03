@@ -42,16 +42,42 @@ def test_direct_id_json_wrapper_is_not_the_id_transport_itself():
 
 
 def test_playground_analysis_uses_measured_counts_and_separates_compression():
-    from bytetoken.playground.analysis import analyze_payload
+    from bytetoken.playground.analysis import _direct_encoder, _standard_encoder, analyze_payload
 
-    report = analyze_payload(b'{"records":[' + b'{"value":"repeat repeat repeat"},' * 32 + b']}', "cl100k_base")
+    payload = b'{"records":[' + b'{"value":"repeat repeat repeat"},' * 32 + b']}'
+    report = analyze_payload(payload, "cl100k_base")
     reps = {item["id"]: item for item in report["representations"]}
     assert report["input"]["tokenizer"] == "cl100k_base"
     assert reps["base64"]["tokens"] > 0
     assert reps["bytetoken_standard"]["bit_width"] == 15
     assert reps["direct_id"]["kind"] == "local token-ID representation"
-    assert "compression" in report
+    assert _standard_encoder("cl100k_base").decode(_standard_encoder("cl100k_base").encode(payload)) == payload
+    direct = _direct_encoder("cl100k_base")
+    assert direct.decode(direct.encode(payload)) == payload
     assert report["compression"]["algorithm"] == "lzma"
+
+
+def test_playground_request_boundary_accepts_text_and_base64():
+    import base64
+    from bytetoken.playground.app import AnalyzeRequest, analyze, config
+
+    text_report = analyze(AnalyzeRequest(input_type="text", payload="hello ByteToken", tokenizer="o200k_base"))
+    assert text_report["input"]["bytes"] == len("hello ByteToken".encode("utf-8"))
+
+    raw = b"\x00\xffbinary\x10payload"
+    encoded = base64.b64encode(raw).decode("ascii")
+    binary_report = analyze(AnalyzeRequest(input_type="base64", payload=encoded, tokenizer="cl100k_base"))
+    assert binary_report["input"]["bytes"] == len(raw)
+    assert config()["max_input_bytes"] > 0
+
+
+def test_playground_cli_is_registered_without_starting_server():
+    from bytetoken.__main__ import build_parser
+
+    args = build_parser().parse_args(["playground", "--host", "127.0.0.1", "--port", "9000"])
+    assert args.command == "playground"
+    assert args.host == "127.0.0.1"
+    assert args.port == 9000
 
 
 def test_cli_standard_roundtrip(tmp_path):
