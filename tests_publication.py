@@ -41,6 +41,19 @@ def test_direct_id_json_wrapper_is_not_the_id_transport_itself():
     assert encoder.decode(ids) == payload; assert encoder.decode_from_string(text) == payload
 
 
+def test_playground_analysis_uses_measured_counts_and_separates_compression():
+    from bytetoken.playground.analysis import analyze_payload
+
+    report = analyze_payload(b'{"records":[' + b'{"value":"repeat repeat repeat"},' * 32 + b']}', "cl100k_base")
+    reps = {item["id"]: item for item in report["representations"]}
+    assert report["input"]["tokenizer"] == "cl100k_base"
+    assert reps["base64"]["tokens"] > 0
+    assert reps["bytetoken_standard"]["bit_width"] == 15
+    assert reps["direct_id"]["kind"] == "local token-ID representation"
+    assert "compression" in report
+    assert report["compression"]["algorithm"] == "lzma"
+
+
 def test_cli_standard_roundtrip(tmp_path):
     source = tmp_path / "payload.bin"; encoded = tmp_path / "payload.bt"; restored = tmp_path / "restored.bin"
     source.write_bytes(b"cli publication smoke test\x00\xff")
