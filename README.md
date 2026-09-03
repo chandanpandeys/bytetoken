@@ -46,6 +46,19 @@ Run the tests:
 python -m pytest tests.py tests_publication.py -v
 ```
 
+## Playground
+
+The optional ByteToken Playground turns the research prototype into an interactive measurement surface. Paste UTF-8 text or Base64 bytes, choose `cl100k_base` or `o200k_base`, and compare the same payload across Base64, ByteToken Standard 15-bit, the shared 13-bit text mode, Direct-ID local token IDs, and LZMA-assisted transports.
+
+The Playground reports measured token counts, encode/decode latency, keeps compression savings separate from ByteToken savings, and verifies each displayed encode → decode path byte-for-byte against the original payload.
+
+```bash
+python -m pip install -e ".[playground]"
+bytetoken playground
+```
+
+Then open `http://127.0.0.1:8000`. See [PLAYGROUND.md](PLAYGROUND.md) for deployment and scope details. Unexpected results can be reported through the dedicated Playground issue template.
+
 ## Quick start
 
 ```python
@@ -127,6 +140,7 @@ bytetoken/
 ├── profiler.py                # context/payload diagnostics
 ├── store.py                   # in-memory artifact-store prototype
 ├── mcp.py                     # experimental MCP-oriented wire wrapper
+├── playground/                # measured FastAPI playground + static UI
 ├── benchmarks/                # controlled benchmark scripts
 ├── examples/                  # deterministic local demonstration
 ├── formal/                    # formal specification work (partial)
