@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ByteToken Playground</title>
-  <meta name="description" content="Measure ByteToken transport encodings against Base64 using real tokenizer counts." />
+  <meta name="description" content="Measure ByteToken transport encodings against Base64 using real tokenizer counts and verified lossless round trips." />
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
 <body>
@@ -13,9 +13,13 @@
       <div>
         <p class="eyebrow">ByteToken research prototype</p>
         <h1>See what your bytes cost in tokens.</h1>
-        <p class="lede">Compare Base64, ByteToken Standard, shared-alphabet ByteToken, Direct ID, and LZMA-assisted transport on the exact same payload.</p>
+        <p class="lede">Compare Base64, ByteToken Standard, shared-alphabet ByteToken, Direct ID, and LZMA-assisted transport on the exact same payload, then verify every path decodes back to the original bytes.</p>
       </div>
-      <a class="github-link" href="https://github.com/chandanpandeys/bytetoken" target="_blank" rel="noreferrer">GitHub ↗</a>
+      <div class="hero-actions">
+        <a class="github-link" href="https://github.com/chandanpandeys/bytetoken" target="_blank" rel="noreferrer">GitHub ↗</a>
+        <a class="github-link" href="https://github.com/chandanpandeys/bytetoken/blob/main/paper/bytetoken_paper.md" target="_blank" rel="noreferrer">Paper ↗</a>
+        <a class="github-link" href="https://github.com/chandanpandeys/bytetoken/issues/new" target="_blank" rel="noreferrer">Report a case ↗</a>
+      </div>
     </header>
 
     <section class="workspace">
@@ -50,7 +54,7 @@
           <button data-example="code">Code</button>
           <button data-example="repeat">Compressible</button>
         </div>
-        <button id="analyzeButton" class="primary">Analyze transport</button>
+        <button id="analyzeButton" class="primary">Analyze + verify transport</button>
         <p id="error" class="error" role="alert"></p>
       </div>
 
@@ -61,7 +65,7 @@
         </div>
         <div id="summary" class="empty-state">
           <div class="pulse-dot"></div>
-          <p>Run an analysis to compare token counts and transport layers.</p>
+          <p>Run an analysis to compare token counts and verify lossless encode → decode paths.</p>
         </div>
       </div>
     </section>
@@ -69,7 +73,7 @@
     <section id="results" class="results hidden">
       <div class="section-heading">
         <div><span class="step">03</span><h2>Transport comparison</h2></div>
-        <p>Lower token count is better. Direct ID is shown separately because it is not text transport.</p>
+        <p>Lower token count is better. Direct ID is shown separately because it is not text transport. Every card includes a byte-for-byte round-trip check.</p>
       </div>
       <div id="cards" class="cards"></div>
 
