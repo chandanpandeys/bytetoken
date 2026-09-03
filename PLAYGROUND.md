@@ -29,6 +29,24 @@ For the selected `cl100k_base` or `o200k_base` tokenizer, the Playground compare
 
 The token counts for text transports are computed with the selected tokenizer on the exact transport text. Direct-ID is counted as token IDs rather than by tokenizing its JSON debug/storage wrapper.
 
+Every displayed transport is decoded after measurement and compared byte-for-byte with the original input. The UI surfaces an explicit lossless round-trip result and decode latency rather than assuming reversibility from the encoder implementation.
+
+## Public deployment
+
+The repository includes a Vercel FastAPI entrypoint in `pyproject.toml` and a root `requirements.txt` that installs the optional `playground` dependency set. A Vercel project imported from this repository can therefore serve the same FastAPI app and packaged static UI without changing the core ByteToken dependency set for library users.
+
+The deployment entrypoint is:
+
+```text
+bytetoken.playground.app:app
+```
+
+The application itself has no database or persistent user state. Do not paste secrets or private payloads into a public deployment.
+
+## Feedback
+
+The Playground links to `.github/ISSUE_TEMPLATE/playground-report.md` so unexpected token counts or round-trip failures can be reported with the tokenizer, measured values, commit/deployment, and a minimal public reproduction payload.
+
 ## Scope
 
 The Playground intentionally keeps compression and encoding results separate. It does not claim that a model can understand encoded binary payloads, that a hosted API accepts pre-tokenized IDs, or that a generative model will copy an encoded sequence losslessly.
