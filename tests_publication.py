@@ -51,6 +51,10 @@ def test_playground_analysis_uses_measured_counts_and_separates_compression():
     assert reps["base64"]["tokens"] > 0
     assert reps["bytetoken_standard"]["bit_width"] == 15
     assert reps["direct_id"]["kind"] == "local token-ID representation"
+    assert report["verification"]["all_roundtrips_ok"] is True
+    assert all(item["roundtrip_ok"] is True for item in report["representations"])
+    assert report["compression"]["base64"]["roundtrip_ok"] is True
+    assert report["compression"]["bytetoken_standard"]["roundtrip_ok"] is True
     assert _standard_encoder("cl100k_base").decode(_standard_encoder("cl100k_base").encode(payload)) == payload
     direct = _direct_encoder("cl100k_base")
     assert direct.decode(direct.encode(payload)) == payload
@@ -63,11 +67,13 @@ def test_playground_request_boundary_accepts_text_and_base64():
 
     text_report = analyze(AnalyzeRequest(input_type="text", payload="hello ByteToken", tokenizer="o200k_base"))
     assert text_report["input"]["bytes"] == len("hello ByteToken".encode("utf-8"))
+    assert text_report["verification"]["all_roundtrips_ok"] is True
 
     raw = b"\x00\xffbinary\x10payload"
     encoded = base64.b64encode(raw).decode("ascii")
     binary_report = analyze(AnalyzeRequest(input_type="base64", payload=encoded, tokenizer="cl100k_base"))
     assert binary_report["input"]["bytes"] == len(raw)
+    assert binary_report["verification"]["all_roundtrips_ok"] is True
     assert config()["max_input_bytes"] > 0
 
 
