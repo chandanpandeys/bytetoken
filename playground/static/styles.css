@@ -14,6 +14,7 @@ body { margin: 0; background: radial-gradient(circle at 15% 0%, #17191d 0, var(-
 button, select, textarea { font: inherit; }
 .shell { max-width: 1240px; margin: 0 auto; padding: 48px 24px 80px; }
 .hero { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; margin-bottom: 36px; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .eyebrow, .step { color: var(--accent); text-transform: uppercase; letter-spacing: .12em; font-size: 12px; font-weight: 800; }
 h1 { max-width: 780px; margin: 4px 0 12px; font-size: clamp(42px, 7vw, 86px); line-height: .96; letter-spacing: -.055em; }
 h2 { margin: 3px 0 0; font-size: 20px; letter-spacing: -.02em; }
@@ -46,7 +47,11 @@ textarea:focus { border-color: #596020; box-shadow: 0 0 0 3px rgba(216,255,62,.0
 .metric { font-size: 34px; font-weight: 850; letter-spacing: -.04em; margin: 10px 0 2px; }
 .metric-label { color: var(--muted); font-size: 12px; }
 .saving { margin: 14px 0; font-weight: 750; }
-.saving.positive { color: var(--accent); }
+.saving.positive, .ok-text { color: var(--accent); }
+.bad-text { color: #ff8b8b; }
+.roundtrip { display: inline-flex; align-items: center; margin: 0 0 10px; border: 1px solid var(--line); border-radius: 999px; padding: 4px 8px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
+.roundtrip.ok { color: var(--accent); border-color: #5f691e; background: rgba(216,255,62,.05); }
+.roundtrip.bad { color: #ff8b8b; border-color: #6b3030; background: rgba(255,139,139,.05); }
 .preview { margin-top: 12px; padding: 10px; background: #0b0c0e; border-radius: 10px; color: #b7bbc2; font: 11px/1.45 ui-monospace, monospace; max-height: 120px; overflow: auto; overflow-wrap: anywhere; }
 .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .summary-cell { padding: 14px; border: 1px solid var(--line); border-radius: 12px; }
