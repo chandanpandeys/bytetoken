@@ -5,12 +5,17 @@ on:
     branches: [main]
     paths:
       - "paper/**"
+      - "!paper/bytetoken_paper.pdf"
       - ".github/workflows/paper.yml"
   push:
     branches: [main]
     paths:
       - "paper/**"
+      - "!paper/bytetoken_paper.pdf"
       - ".github/workflows/paper.yml"
+
+permissions:
+  contents: write
 
 jobs:
   build-paper:
@@ -40,3 +45,16 @@ jobs:
           name: bytetoken-paper
           path: paper/bytetoken_paper.pdf
           if-no-files-found: error
+
+      - name: Publish stable PDF to repository
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f paper/bytetoken_paper.pdf
+          if git diff --cached --quiet; then
+            echo "Compiled PDF is unchanged."
+            exit 0
+          fi
+          git commit -m "docs(paper): refresh compiled PDF"
+          git push

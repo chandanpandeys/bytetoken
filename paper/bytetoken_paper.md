@@ -205,7 +205,7 @@ Lossless encode/decode functions do not imply lossless passage through unconstra
 1. **Tokenizer/version dependence.** Candidate alphabets depend on the exact tokenizer implementation and version.
 2. **No universal BPE theorem.** Space-prefixed behavior is empirically useful in the tested encodings, not a theorem of BPE.
 3. **Fixed-width bound is model-scoped.** The optimality proposition applies only to the defined fixed-symbol encoding model.
-4. **Direct-ID deployment is limited.** It requires an interface that accepts/preseves token IDs directly.
+4. **Direct-ID deployment is limited.** It requires an interface that accepts/preserves token IDs directly.
 5. **Synthetic benchmark corpus.** The included developer payload benchmark is generated, not a corpus of independent real-world traces.
 6. **Compression dominates some totals.** Large end-to-end reductions on structured data may be mostly due to LZMA.
 7. **No model reasoning benefit is demonstrated.** ByteToken does not make arbitrary binary content intelligible to the model.
@@ -237,7 +237,7 @@ python -m pytest tests.py -v
 python benchmarks/benchmark_realworld.py
 ```
 
-Generated LaTeX artifacts are not committed. The repository's paper workflow compiles `paper/bytetoken_paper.tex` and publishes the PDF as a CI artifact.
+The repository's paper workflow compiles `paper/bytetoken_paper.tex`, uploads the PDF as a CI artifact, and publishes the validated PDF at `paper/bytetoken_paper.pdf` on the main branch. Intermediate LaTeX build files are not committed.
 
 ## 9. Future work
 
