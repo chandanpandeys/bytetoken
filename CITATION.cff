@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+message: "If you use ByteToken in research or evaluation, please cite the repository and pin the version or commit you tested."
+title: "ByteToken: Tokenizer-Aware Binary Transport for Tokenized LLM Interfaces"
+type: software
+authors:
+  - family-names: Pandey
+    given-names: Chandan
+repository-code: "https://github.com/chandanpandeys/bytetoken"
+url: "https://bytetoken-playground-kcwc.vercel.app"
+version: 0.1.0
+date-released: 2026-09-01
+license: MIT
+keywords:
+  - llm
+  - tokenizer
+  - binary transport
+  - base64
+  - tiktoken
+  - ai agents
+preferred-citation:
+  type: software
+  authors:
+    - family-names: Pandey
+      given-names: Chandan
+  title: "ByteToken: Tokenizer-Aware Binary Transport for Tokenized LLM Interfaces"
+  version: 0.1.0
+  year: 2026
+  repository-code: "https://github.com/chandanpandeys/bytetoken"
+  url: "https://github.com/chandanpandeys/bytetoken"

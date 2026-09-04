@@ -6,6 +6,8 @@
 
 **Experimental tokenizer-aware binary transport for tokenized LLM interfaces.**
 
+**[Live Playground](https://bytetoken-playground-kcwc.vercel.app)** · **[Paper PDF](paper/bytetoken_paper.pdf)** · **[Research preview v0.1.0](https://github.com/chandanpandeys/bytetoken/releases/tag/v0.1.0)**
+
 ByteToken explores a narrow systems question:
 
 > If arbitrary bytes **must** cross a tokenizer-backed text or token interface, can a tokenizer-aware encoding use fewer tokens than conventional Base64?
@@ -59,7 +61,15 @@ python -m pip install -e ".[playground]"
 bytetoken playground
 ```
 
-For local use, open `http://127.0.0.1:8000`. See [PLAYGROUND.md](PLAYGROUND.md) for deployment and scope details. Unexpected results can be reported through the dedicated Playground issue template.
+For local use, open `http://127.0.0.1:8000`. See [PLAYGROUND.md](PLAYGROUND.md) for a browser verification walkthrough, deployment details, and scope. Unexpected results can be reported through the dedicated Playground issue template.
+
+## Measured example
+
+![ByteToken measured example: Base64 versus ByteToken Standard 15-bit](docs/assets/bytetoken-measured-example.svg)
+
+In the repository's deterministic synthetic JSON API benchmark (21,547 bytes, `o200k_base`, `tiktoken 0.14.0`), Base64 measures **18,252 tokens** while ByteToken Standard 15-bit measures **11,493 tokens**, a **37.0% reduction for that payload and tokenizer**. Compression is reported separately: LZMA + Base64 measures 1,121 tokens and LZMA + ByteToken-15 measures 671 tokens.
+
+That example is evidence for one controlled case, not a universal percentage claim. Run `python benchmarks/benchmark_realworld.py` or use the Playground to measure your own bytes with the same tokenizer on every text representation.
 
 ## Quick start
 
@@ -96,7 +106,7 @@ The repository includes:
 python benchmarks/benchmark_realworld.py
 ```
 
-Despite the historical filename, the benchmark generates **deterministic synthetic developer-like payloads** (JSON, pytest-style output, CSV, source code, logs, an embedding vector, and a deterministic random-byte control). The encoder and token counter now use the same declared `o200k_base` tokenizer. It reports:
+Despite the historical filename, the benchmark generates **deterministic synthetic developer-like payloads** (JSON, pytest-style output, CSV, source code, logs, an embedding vector, and a deterministic random-byte control). The encoder and token counter use the same declared `o200k_base` tokenizer. It reports:
 
 - Base64 token counts;
 - ByteToken-15 token counts;
@@ -147,9 +157,11 @@ bytetoken/
 ├── examples/                  # deterministic local demonstration
 ├── formal/                    # formal specification work (partial)
 ├── paper/                     # canonical manuscript sources + compiled PDF
+├── docs/assets/               # public research/demo visuals
 ├── rust_core/                 # experimental native backend
 ├── tests.py                   # core Python test suite
-└── tests_publication.py       # public-surface regression tests
+├── tests_publication.py       # public-surface regression tests
+└── CITATION.cff               # GitHub-readable citation metadata
 ```
 
 The Lean material in `formal/` is a **formal specification/proof work in progress**. It should not be described as a complete machine-checked proof of concrete tokenizer behavior while placeholders or axiomatized tokenizer assumptions remain.
@@ -190,7 +202,7 @@ Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) and op
 
 ## Citation
 
-If you build on the current research prototype, cite the repository and pin the commit or release you evaluated:
+GitHub can render the repository citation from [`CITATION.cff`](CITATION.cff). If you build on the current research prototype, cite the repository and pin the commit or release you evaluated:
 
 ```bibtex
 @software{pandey2026bytetoken,
