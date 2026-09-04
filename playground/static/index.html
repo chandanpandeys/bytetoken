@@ -3,8 +3,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ByteToken Playground</title>
-  <meta name="description" content="Measure ByteToken transport encodings against Base64 using real tokenizer counts and verified lossless round trips." />
+  <title>ByteToken Playground — Measure binary transport token cost</title>
+  <meta name="description" content="Compare Base64 and tokenizer-aware ByteToken transports using real tokenizer counts and verified lossless round trips." />
+  <meta name="robots" content="index,follow" />
+  <meta name="theme-color" content="#0a0a0a" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="ByteToken Playground" />
+  <meta property="og:description" content="Measure Base64 vs tokenizer-aware binary transport with real token counts and byte-for-byte round-trip verification." />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="ByteToken Playground" />
+  <meta name="twitter:description" content="Measure Base64 vs tokenizer-aware binary transport with real token counts and lossless verification." />
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
 <body>
@@ -14,6 +22,11 @@
         <p class="eyebrow">ByteToken research prototype</p>
         <h1>See what your bytes cost in tokens.</h1>
         <p class="lede">Compare Base64, ByteToken Standard, shared-alphabet ByteToken, Direct ID, and LZMA-assisted transport on the exact same payload, then verify every path decodes back to the original bytes.</p>
+        <div class="scope-strip" aria-label="Research scope">
+          <span>Encoding ≠ compression</span>
+          <span>Direct ID is local-only research</span>
+          <span>No model-understanding claim</span>
+        </div>
       </div>
       <div class="hero-actions">
         <a class="github-link" href="https://github.com/chandanpandeys/bytetoken" target="_blank" rel="noreferrer">GitHub ↗</a>
@@ -88,6 +101,11 @@
         </article>
       </div>
     </section>
+
+    <footer class="footer">
+      <span>MIT-licensed experimental research preview.</span>
+      <a href="https://github.com/chandanpandeys/bytetoken/blob/main/benchmarks/benchmark_realworld.py" target="_blank" rel="noreferrer">Reproduce the benchmark ↗</a>
+    </footer>
   </main>
   <script src="/static/app.js" defer></script>
 </body>
