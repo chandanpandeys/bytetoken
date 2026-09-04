@@ -56,6 +56,18 @@ The optional ByteToken Playground turns the research prototype into an interacti
 
 The Playground reports measured token counts, encode/decode latency, keeps compression savings separate from ByteToken savings, and verifies each displayed encode → decode path byte-for-byte against the original payload.
 
+### Recorded demo
+
+**[▶ Watch the recorded live Playground demo](docs/media/bytetoken-playground-demo.mp4)**
+
+<p>
+  <a href="docs/media/01_hero_and_paper_links.png"><img src="docs/media/01_hero_and_paper_links.png" alt="ByteToken Playground hero with research scope guardrails and paper links" width="32%"></a>
+  <a href="docs/media/02_measured_transport_comparison.png"><img src="docs/media/02_measured_transport_comparison.png" alt="ByteToken Playground measured transport comparison after a verified analysis" width="32%"></a>
+  <a href="docs/media/03_compression_and_scope.png"><img src="docs/media/03_compression_and_scope.png" alt="ByteToken Playground compression layer and scope guardrails" width="32%"></a>
+</p>
+
+These are browser captures of the public production Playground using the JSON example and `o200k_base`. The capture workflow records the live interaction, commits the PNG/MP4 files to the repository, and writes SHA-256 checksums alongside them. Visible latency values belong to that capture run; the media is a demonstration rather than additional benchmark evidence. See [media capture details](docs/media/README.md) and [checksums](docs/media/SHA256SUMS).
+
 ```bash
 python -m pip install -e ".[playground]"
 bytetoken playground
@@ -158,6 +170,7 @@ bytetoken/
 ├── formal/                    # formal specification work (partial)
 ├── paper/                     # canonical manuscript sources + compiled PDF
 ├── docs/assets/               # public research/demo visuals
+├── docs/media/                # captured production screenshots + demo recording
 ├── rust_core/                 # experimental native backend
 ├── tests.py                   # core Python test suite
 ├── tests_publication.py       # public-surface regression tests
