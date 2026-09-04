@@ -2,6 +2,8 @@
 
 The Playground is an optional web surface for measuring ByteToken transport representations on identical input bytes.
 
+**Public deployment:** https://bytetoken-playground-kcwc.vercel.app
+
 ## Run locally
 
 ```bash
@@ -33,6 +35,8 @@ Every displayed transport is decoded after measurement and compared byte-for-byt
 
 ## Public deployment
 
+The canonical public Playground is https://bytetoken-playground-kcwc.vercel.app.
+
 The repository includes a Vercel FastAPI entrypoint in `pyproject.toml` and a root `requirements.txt` that installs the optional `playground` dependency set. A Vercel project imported from this repository can therefore serve the same FastAPI app and packaged static UI without changing the core ByteToken dependency set for library users.
 
 The deployment entrypoint is:
@@ -41,7 +45,7 @@ The deployment entrypoint is:
 bytetoken.playground.app:app
 ```
 
-[Deploy the Playground to Vercel](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fchandanpandeys%2Fbytetoken&repository-name=bytetoken-playground) after the Playground changes are on `main`.
+[Deploy your own Playground to Vercel](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fchandanpandeys%2Fbytetoken&repository-name=bytetoken-playground) after the Playground changes are on `main`.
 
 The application itself has no database or persistent user state. Do not paste secrets or private payloads into a public deployment.
 
