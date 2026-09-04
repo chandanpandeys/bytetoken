@@ -1,1 +1,0 @@
-The generated screenshots and MP4 are live demonstration captures of the production Playground. They are not treated as benchmark artifacts. Visible latency values may vary by capture run; transport token counts are measured by the Playground for the selected payload/tokenizer and every displayed path is round-trip verified by the application.
