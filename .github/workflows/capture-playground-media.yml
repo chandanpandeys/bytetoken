@@ -1,0 +1,71 @@
+name: Capture Playground media
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/capture-playground-media.yml"
+      - "scripts/capture_playground_media.mjs"
+
+permissions:
+  contents: write
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install capture dependencies
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+
+      - name: Capture live production Playground
+        run: node scripts/capture_playground_media.mjs
+
+      - name: Convert browser recording to MP4
+        run: |
+          ffmpeg -y \
+            -i docs/media/bytetoken-playground-demo.webm \
+            -c:v libx264 -preset medium -crf 20 \
+            -pix_fmt yuv420p -movflags +faststart \
+            -r 30 \
+            docs/media/bytetoken-playground-demo.mp4
+          rm docs/media/bytetoken-playground-demo.webm
+
+      - name: Record media checksums
+        run: |
+          cd docs/media
+          sha256sum \
+            01_hero_and_paper_links.png \
+            02_measured_transport_comparison.png \
+            03_compression_and_scope.png \
+            bytetoken-playground-demo.mp4 \
+            > SHA256SUMS
+
+      - name: Publish generated media to main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f docs/media/01_hero_and_paper_links.png
+          git add -f docs/media/02_measured_transport_comparison.png
+          git add -f docs/media/03_compression_and_scope.png
+          git add -f docs/media/bytetoken-playground-demo.mp4
+          git add -f docs/media/SHA256SUMS
+          if git diff --cached --quiet; then
+            echo "Captured media is unchanged."
+            exit 0
+          fi
+          git commit -m "docs(media): refresh live Playground screenshots and recording"
+          git push
