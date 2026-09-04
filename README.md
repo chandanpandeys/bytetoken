@@ -25,8 +25,8 @@ The current implementation and paper focus primarily on OpenAI `tiktoken` encodi
 | Mode | Representation | Current scope | Notes |
 |---|---|---|---|
 | Standard | tokenizer-stable text | `cl100k_base`, `o200k_base` | Fixed-width encoding using space-prefixed candidate atoms; 15-bit is the conservative default. |
-| Universal | shared tokenizer-stable text | intersection of tested `cl100k_base` and `o200k_base` atoms | Intended for portability **between the tested tiktoken encodings**, not "all LLMs". The public high-level default uses 13 bits. |
-| Direct ID | `list[int]` token IDs | local/compatible token-ID interfaces | Can reach 16–17 bits per token in the tested vocabularies. Current hosted text APIs should not be assumed to accept arbitrary pre-tokenized ID arrays. |
+| Universal | shared tokenizer-stable text | intersection of tested `cl100k_base` and `o200k_base` atoms | Intended for portability **between the tested tiktoken encodings**, not "all LLMs". The high-level default uses 13 bits. |
+| Direct ID | `list[int]` token IDs | local/compatible token-ID interfaces | Can reach 16–17 bits per token in the tested vocabularies. Hosted text APIs should not be assumed to accept arbitrary pre-tokenized ID arrays. |
 | SentencePiece | text | included test SentencePiece model | Experimental compatibility path; not a claim covering every SentencePiece model. |
 | Error detecting | wrapper | any supported inner encoder | Adds CRC-32 corruption detection. CRC detects errors; it does not correct them. |
 
@@ -34,7 +34,7 @@ The `DirectIDEncoder.encode_to_string()` helper serializes IDs as JSON for stora
 
 ## Installation
 
-ByteToken is not currently presented here as a published PyPI release. Install from the repository:
+Install from source:
 
 ```bash
 git clone https://github.com/chandanpandeys/bytetoken.git
@@ -52,13 +52,13 @@ python -m pytest tests.py tests_publication.py -v
 
 **[Open the public ByteToken Playground →](https://bytetoken-playground-kcwc.vercel.app)**
 
-The optional ByteToken Playground turns the research prototype into an interactive measurement surface. Paste UTF-8 text or Base64 bytes, choose `cl100k_base` or `o200k_base`, and compare the same payload across Base64, ByteToken Standard 15-bit, the shared 13-bit text mode, Direct-ID local token IDs, and LZMA-assisted transports.
+The Playground provides an interactive measurement surface for the same payload across Base64, ByteToken Standard 15-bit, the shared 13-bit text mode, Direct-ID local token IDs, and LZMA-assisted transports. Paste UTF-8 text or Base64 bytes and choose either `cl100k_base` or `o200k_base`.
 
-The Playground reports measured token counts, encode/decode latency, keeps compression savings separate from ByteToken savings, and verifies each displayed encode → decode path byte-for-byte against the original payload.
+It reports measured token counts and encode/decode latency, keeps compression results separate from ByteToken representation results, and verifies each displayed encode → decode path byte-for-byte against the original payload.
 
 ### Recorded demo
 
-**[▶ Watch the recorded live Playground demo](docs/media/bytetoken-playground-demo.mp4)**
+**[▶ Watch the Playground demo](docs/media/bytetoken-playground-demo.mp4)**
 
 <p>
   <a href="docs/media/01_hero_and_paper_links.png"><img src="docs/media/01_hero_and_paper_links.png" alt="ByteToken Playground hero with research scope guardrails and paper links" width="32%"></a>
@@ -66,22 +66,24 @@ The Playground reports measured token counts, encode/decode latency, keeps compr
   <a href="docs/media/03_compression_and_scope.png"><img src="docs/media/03_compression_and_scope.png" alt="ByteToken Playground compression layer and scope guardrails" width="32%"></a>
 </p>
 
-These are browser captures of the public production Playground using the JSON example and `o200k_base`. The capture workflow records the live interaction, commits the PNG/MP4 files to the repository, and writes SHA-256 checksums alongside them. Visible latency values belong to that capture run; the media is a demonstration rather than additional benchmark evidence. See [media capture details](docs/media/README.md) and [checksums](docs/media/SHA256SUMS).
+The demo uses the built-in JSON example with `o200k_base`. Token counts and timing values shown in the demo are specific to that payload and run.
+
+Run the Playground locally:
 
 ```bash
 python -m pip install -e ".[playground]"
 bytetoken playground
 ```
 
-For local use, open `http://127.0.0.1:8000`. See [PLAYGROUND.md](PLAYGROUND.md) for a browser verification walkthrough, deployment details, and scope. Unexpected results can be reported through the dedicated Playground issue template.
+Then open `http://127.0.0.1:8000`. See [PLAYGROUND.md](PLAYGROUND.md) for deployment and scope details. Unexpected results can be reported through the dedicated Playground issue template.
 
 ## Measured example
 
 ![ByteToken measured example: Base64 versus ByteToken Standard 15-bit](docs/assets/bytetoken-measured-example.svg)
 
-In the repository's deterministic synthetic JSON API benchmark (21,547 bytes, `o200k_base`, `tiktoken 0.14.0`), Base64 measures **18,252 tokens** while ByteToken Standard 15-bit measures **11,493 tokens**, a **37.0% reduction for that payload and tokenizer**. Compression is reported separately: LZMA + Base64 measures 1,121 tokens and LZMA + ByteToken-15 measures 671 tokens.
+In the deterministic synthetic JSON API benchmark (21,547 bytes, `o200k_base`, `tiktoken 0.14.0`), Base64 measures **18,252 tokens** while ByteToken Standard 15-bit measures **11,493 tokens**, a **37.0% reduction for that payload and tokenizer**. Compression is reported separately: LZMA + Base64 measures 1,121 tokens and LZMA + ByteToken-15 measures 671 tokens.
 
-That example is evidence for one controlled case, not a universal percentage claim. Run `python benchmarks/benchmark_realworld.py` or use the Playground to measure your own bytes with the same tokenizer on every text representation.
+This is one controlled result, not a universal savings claim. Run `python benchmarks/benchmark_realworld.py` or use the Playground to measure your own payload with the same tokenizer applied to every text representation.
 
 ## Quick start
 
@@ -112,13 +114,13 @@ assert restored == b"binary data"
 
 ## Benchmarking
 
-The repository includes:
+Run the deterministic benchmark suite with:
 
 ```bash
 python benchmarks/benchmark_realworld.py
 ```
 
-Despite the historical filename, the benchmark generates **deterministic synthetic developer-like payloads** (JSON, pytest-style output, CSV, source code, logs, an embedding vector, and a deterministic random-byte control). The encoder and token counter use the same declared `o200k_base` tokenizer. It reports:
+It generates synthetic developer-like payloads covering JSON, pytest-style output, CSV, source code, logs, an embedding vector, and a deterministic random-byte control. The encoder and token counter use the same declared `o200k_base` tokenizer. It reports:
 
 - Base64 token counts;
 - ByteToken-15 token counts;
@@ -127,7 +129,7 @@ Despite the historical filename, the benchmark generates **deterministic synthet
 - LZMA + ByteToken-15; and
 - LZMA + Direct-ID-17 local representation counts.
 
-This distinction matters: on structured data, conventional compression can account for most of the total reduction. ByteToken should be evaluated as the **binary-to-token representation layer**, while LZMA/zstd/Brotli/etc. should be evaluated as separate compression layers.
+On structured data, conventional compression can account for most of the total reduction. ByteToken should therefore be evaluated as the **binary-to-token representation layer**, while LZMA/zstd/Brotli/etc. should be evaluated as separate compression layers.
 
 For publishable comparisons, use the same source bytes and target tokenizer for every method and report both token count and encode/decode latency.
 
@@ -168,27 +170,27 @@ bytetoken/
 ├── benchmarks/                # controlled benchmark scripts
 ├── examples/                  # deterministic local demonstration
 ├── formal/                    # formal specification work (partial)
-├── paper/                     # canonical manuscript sources + compiled PDF
-├── docs/assets/               # public research/demo visuals
-├── docs/media/                # captured production screenshots + demo recording
+├── paper/                     # manuscript sources + compiled PDF
+├── docs/assets/               # research/demo visuals
+├── docs/media/                # Playground screenshots + demo recording
 ├── rust_core/                 # experimental native backend
 ├── tests.py                   # core Python test suite
 ├── tests_publication.py       # public-surface regression tests
-└── CITATION.cff               # GitHub-readable citation metadata
+└── CITATION.cff               # citation metadata
 ```
 
-The Lean material in `formal/` is a **formal specification/proof work in progress**. It should not be described as a complete machine-checked proof of concrete tokenizer behavior while placeholders or axiomatized tokenizer assumptions remain.
+The Lean material in `formal/` is a work in progress and does not yet constitute a complete machine-checked proof of concrete tokenizer behavior.
 
 ## Research paper
 
-The publication-oriented manuscript is available in both compiled and source forms:
+The manuscript is available in compiled and source forms:
 
 - **[Paper PDF](paper/bytetoken_paper.pdf)**
 - [Markdown paper](paper/bytetoken_paper.md)
 - [LaTeX source](paper/bytetoken_paper.tex)
 - [Bibliography](paper/references.bib)
 
-The paper workflow compiles the LaTeX source, validates the build, uploads a CI artifact, and refreshes the stable PDF on `main` when manuscript sources change.
+The PDF is compiled from the LaTeX manuscript; the Markdown version and bibliography are included for inspection and reproduction.
 
 ## Reproducibility checklist
 
@@ -215,7 +217,7 @@ Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) and op
 
 ## Citation
 
-GitHub can render the repository citation from [`CITATION.cff`](CITATION.cff). If you build on the current research prototype, cite the repository and pin the commit or release you evaluated:
+Citation metadata is available in [`CITATION.cff`](CITATION.cff). If you build on the current research prototype, cite the repository and pin the commit or release you evaluated:
 
 ```bibtex
 @software{pandey2026bytetoken,
