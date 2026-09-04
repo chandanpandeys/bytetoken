@@ -19,7 +19,10 @@ button, select, textarea { font: inherit; }
 h1 { max-width: 780px; margin: 4px 0 12px; font-size: clamp(42px, 7vw, 86px); line-height: .96; letter-spacing: -.055em; }
 h2 { margin: 3px 0 0; font-size: 20px; letter-spacing: -.02em; }
 .lede { max-width: 760px; color: var(--muted); font-size: 17px; }
+.scope-strip { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.scope-strip span { border: 1px solid var(--line); border-radius: 999px; padding: 6px 10px; color: #c4c8ce; background: rgba(255,255,255,.02); font-size: 12px; }
 .github-link { color: var(--text); text-decoration: none; border: 1px solid var(--line); padding: 10px 14px; border-radius: 999px; white-space: nowrap; }
+.github-link:hover, .footer a:hover { border-color: #596020; color: var(--accent); }
 .workspace, .compression-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 18px; }
 .panel { background: linear-gradient(180deg, rgba(255,255,255,.025), transparent), var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 20px; }
 .panel-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
@@ -63,5 +66,7 @@ textarea:focus { border-color: #596020; box-shadow: 0 0 0 3px rgba(216,255,62,.0
 .compression-table td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
 .notes { padding-left: 18px; color: var(--muted); }
 .notes li { margin: 9px 0; }
+.footer { display: flex; justify-content: space-between; gap: 16px; margin-top: 28px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+.footer a { color: var(--muted); text-decoration: none; }
 @media (max-width: 900px) { .workspace, .compression-grid { grid-template-columns: 1fr; } .cards { grid-template-columns: 1fr 1fr; } .hero { flex-direction: column; } }
-@media (max-width: 560px) { .shell { padding: 28px 14px 56px; } .cards, .control-row { grid-template-columns: 1fr; } h1 { font-size: 46px; } .section-heading { align-items: flex-start; flex-direction: column; } }
+@media (max-width: 560px) { .shell { padding: 28px 14px 56px; } .cards, .control-row { grid-template-columns: 1fr; } h1 { font-size: 46px; } .section-heading, .footer { align-items: flex-start; flex-direction: column; } }
