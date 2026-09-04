@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="620" viewBox="0 0 1200 620" role="img" aria-labelledby="title desc">
+  <title id="title">ByteToken measured example</title>
+  <desc id="desc">A deterministic synthetic JSON benchmark using o200k_base shows Base64 at 18,252 tokens and ByteToken Standard 15-bit at 11,493 tokens, a 37.0 percent reduction. Compression results are shown separately.</desc>
+  <rect width="1200" height="620" rx="28" fill="#0b1020"/>
+  <text x="64" y="82" fill="#f8fafc" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="34" font-weight="700">Measured example — same bytes, same tokenizer</text>
+  <text x="64" y="126" fill="#94a3b8" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="20">Deterministic synthetic JSON API payload · 21,547 bytes · o200k_base · tiktoken 0.14.0</text>
+
+  <rect x="64" y="178" width="1072" height="130" rx="18" fill="#111827" stroke="#243047"/>
+  <text x="92" y="222" fill="#cbd5e1" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="20">Base64 text</text>
+  <text x="92" y="270" fill="#f8fafc" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="42" font-weight="700">18,252 tokens</text>
+  <rect x="490" y="223" width="566" height="28" rx="14" fill="#334155"/>
+
+  <rect x="64" y="330" width="1072" height="130" rx="18" fill="#111827" stroke="#243047"/>
+  <text x="92" y="374" fill="#cbd5e1" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="20">ByteToken Standard 15-bit text</text>
+  <text x="92" y="422" fill="#f8fafc" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="42" font-weight="700">11,493 tokens</text>
+  <rect x="490" y="375" width="356" height="28" rx="14" fill="#22c55e"/>
+  <text x="872" y="398" fill="#86efac" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="24" font-weight="700">37.0% fewer</text>
+
+  <line x1="64" y1="498" x2="1136" y2="498" stroke="#243047"/>
+  <text x="64" y="540" fill="#cbd5e1" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="19">Compression is a separate layer: LZMA + Base64 = 1,121 tokens · LZMA + ByteToken-15 = 671 tokens.</text>
+  <text x="64" y="578" fill="#94a3b8" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="18">This is payload- and tokenizer-specific evidence, not a universal savings claim. Every displayed Playground transport is byte-for-byte round-trip verified.</text>
+</svg>
